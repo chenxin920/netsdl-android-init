@@ -21,8 +21,9 @@
             </intent-filter>
         </activity>
         
-        <provider android:name="Provider" android:authorities="com.netsdl.android.init.provider" />
-        
+        <provider
+            android:name="com.netsdl.android.init.provider.Provider"
+            android:authorities="com.netsdl.android.init.provider.Provider" />
     </application>
 
 </manifest>

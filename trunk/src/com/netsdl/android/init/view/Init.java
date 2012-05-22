@@ -25,8 +25,12 @@ import com.netsdl.android.init.dialog.progress.store.StoreProgressDialog;
 import com.netsdl.android.init.dialog.progress.store.StoreProgressHandler;
 import com.netsdl.android.init.dialog.progress.store.StoreProgressThread;
 
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -73,9 +77,9 @@ public class Init {
 	}
 
 	private boolean setSkuVersion() {
-		Object[] objs = parent.dbMaster
+		Object[] objs = parent.data.dbMaster
 				.getSingleColumn(new Object[] { SkuMaster.TABLE_NAME });
-		String version = (String) parent.dbMaster.getColumnValue(objs,
+		String version = (String) parent.data.dbMaster.getColumnValue(objs,
 				DbMaster.COLUMN_VERSION);
 
 		if (version != null) {
@@ -88,9 +92,9 @@ public class Init {
 	}
 
 	private boolean setStoreVersion() {
-		Object[] objs = parent.dbMaster
+		Object[] objs = parent.data.dbMaster
 				.getSingleColumn(new Object[] { StoreMaster.TABLE_NAME });
-		String version = (String) parent.dbMaster.getColumnValue(objs,
+		String version = (String) parent.data.dbMaster.getColumnValue(objs,
 				DbMaster.COLUMN_VERSION);
 
 		if (version != null) {
@@ -103,9 +107,9 @@ public class Init {
 	}
 
 	private boolean setPaymentVersion() {
-		Object[] objs = parent.dbMaster
+		Object[] objs = parent.data.dbMaster
 				.getSingleColumn(new Object[] { PaymentMaster.TABLE_NAME });
-		String version = (String) parent.dbMaster.getColumnValue(objs,
+		String version = (String) parent.data.dbMaster.getColumnValue(objs,
 				DbMaster.COLUMN_VERSION);
 		if (version != null) {
 			((TextView) parent.findViewById(R.id.PaymentDataLocalVersion))
@@ -121,6 +125,23 @@ public class Init {
 				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						// parent.login.init();
+						Intent intent = new Intent(
+								"MainActivity");
+						parent.startActivity(intent);
+
+//						Intent intent = new Intent();
+//						intent.setClassName("com.netsdl.android.main.view",
+//								"com.netsdl.android.main.view.MainActivity");
+//						parent.startActivity(intent);
+
+						// ContentResolver contentResolver = parent
+						// .getContentResolver();
+						// Cursor cursor = contentResolver.query(
+						// Uri.parse("content://com.netsdl.android.init.provider.Provider"),
+						// null, null, null, null);
+						// Log.d("cursor",
+						// cursor == null ? "null" : cursor.toString());
+
 					}
 				});
 	}
@@ -183,7 +204,8 @@ public class Init {
 								commodityProgressDialog);
 						final CommodityProgressThread commodityProgressThread = new CommodityProgressThread(
 								commodityProgressHandler);
-						commodityProgressThread.setSkuMaster(parent.skuMaster);
+						commodityProgressThread
+								.setSkuMaster(parent.data.skuMaster);
 						commodityProgressThread.setUrl(infoSku
 								.get(Constant.URL));
 						commodityProgressHandler
@@ -203,10 +225,10 @@ public class Init {
 								.setOnDismissListener(new OnDismissListener() {
 									public void onDismiss(DialogInterface dialog) {
 										if (commodityProgressThread.mState == AbstractProgressThread.STATE_DONE) {
-											parent.dbMaster.deleteByKey(new String[] { infoSku
+											parent.data.dbMaster.deleteByKey(new String[] { infoSku
 													.get(Constant.VERSION) });
 
-											parent.dbMaster.insert(new String[] {
+											parent.data.dbMaster.insert(new String[] {
 													SkuMaster.TABLE_NAME,
 													infoSku.get(Constant.VERSION) });
 
@@ -247,7 +269,8 @@ public class Init {
 								storeProgressDialog);
 						final StoreProgressThread storeProgressThread = new StoreProgressThread(
 								storeProgressHandler);
-						storeProgressThread.setStoreMaster(parent.storeMaster);
+						storeProgressThread
+								.setStoreMaster(parent.data.storeMaster);
 						storeProgressThread.setUrl(infoStore.get(Constant.URL));
 						storeProgressHandler
 								.setStoreProgressThread(storeProgressThread);
@@ -267,10 +290,10 @@ public class Init {
 								.setOnDismissListener(new OnDismissListener() {
 									public void onDismiss(DialogInterface dialog) {
 										if (storeProgressThread.mState == AbstractProgressThread.STATE_DONE) {
-											parent.dbMaster.deleteByKey(new String[] { infoStore
+											parent.data.dbMaster.deleteByKey(new String[] { infoStore
 													.get(Constant.VERSION) });
 
-											parent.dbMaster.insert(new String[] {
+											parent.data.dbMaster.insert(new String[] {
 													StoreMaster.TABLE_NAME,
 													infoStore
 															.get(Constant.VERSION) });
@@ -312,7 +335,7 @@ public class Init {
 						final PaymentProgressThread paymentProgressThread = new PaymentProgressThread(
 								paymentProgressHandler);
 						paymentProgressThread
-								.setPaymentMaster(parent.paymentMaster);
+								.setPaymentMaster(parent.data.paymentMaster);
 						paymentProgressThread.setUrl(infoPayment
 								.get(Constant.URL));
 						paymentProgressHandler
@@ -333,10 +356,10 @@ public class Init {
 								.setOnDismissListener(new OnDismissListener() {
 									public void onDismiss(DialogInterface dialog) {
 										if (paymentProgressThread.mState == AbstractProgressThread.STATE_DONE) {
-											parent.dbMaster.deleteByKey(new String[] { infoPayment
+											parent.data.dbMaster.deleteByKey(new String[] { infoPayment
 													.get(Constant.VERSION) });
 
-											parent.dbMaster.insert(new String[] {
+											parent.data.dbMaster.insert(new String[] {
 													PaymentMaster.TABLE_NAME,
 													infoPayment
 															.get(Constant.VERSION) });
