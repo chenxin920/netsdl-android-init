@@ -12,7 +12,10 @@ import com.netsdl.android.common.db.SkuMaster;
 import com.netsdl.android.common.db.StoreMaster;
 
 public class Data {
-	private static Map<Context, Data> mapData = new HashMap<Context, Data>();
+	// private static Map<Context, Data> mapData = new HashMap<Context, Data>();
+	private static Data data;
+
+	public Context context;
 
 	public Map<Integer, Object[]> mapSkuMaster;
 
@@ -31,6 +34,7 @@ public class Data {
 	public PosTable posTable = null;
 
 	private Data(Context context) {
+		this.context = context;
 		mapStoreMaster = new HashMap<Integer, Object[]>();
 		mapSkuMaster = new HashMap<Integer, Object[]>();
 		mapPaymentMaster = new HashMap<Integer, Object[]>();
@@ -43,12 +47,11 @@ public class Data {
 	}
 
 	public static Data getInstance(Context context) {
-		Data data = mapData.get(context);
+		// Data data = mapData.get(context);
 		if (data == null) {
 			data = new Data(context);
-			mapData.put(context, data);
+			// mapData.put(context, data);
 		}
-
 		return data;
 	}
 }
