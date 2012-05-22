@@ -3,13 +3,8 @@ package com.netsdl.android.init.view;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.netsdl.android.common.db.DbMaster;
-import com.netsdl.android.common.db.PaymentMaster;
-import com.netsdl.android.common.db.PosTable;
-import com.netsdl.android.common.db.SkuMaster;
-import com.netsdl.android.common.db.StoreMaster;
 import com.netsdl.android.common.view.dialog.Dialogable;
-import com.netsdl.android.init.R;
+import com.netsdl.android.init.data.Data;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -19,38 +14,13 @@ public class InitActivity extends Activity {
 
 	public Map<Integer, Dialogable> mapDialogable;
 
-	public Map<Integer, Object[]> mapSkuMaster;
-
-	public Map<Integer, Object[]> mapStoreMaster;
-
-	public Map<Integer, Object[]> mapPaymentMaster;
-
-	public DbMaster dbMaster = null;
-
-	public SkuMaster skuMaster = null;
-
-	public StoreMaster storeMaster = null;
-
-	public PaymentMaster paymentMaster = null;
-
-	public PosTable posTable = null;
-
+	Data data = null;
+	
 	public Init init = null;
 
 	public InitActivity() {
-		
 		mapDialogable = new HashMap<Integer, Dialogable>();
-
-		mapStoreMaster = new HashMap<Integer, Object[]>();
-		mapSkuMaster = new HashMap<Integer, Object[]>();
-		mapPaymentMaster = new HashMap<Integer, Object[]>();
-
-		dbMaster = new DbMaster(this);
-		skuMaster = new SkuMaster(this);
-		storeMaster = new StoreMaster(this);
-		paymentMaster = new PaymentMaster(this);
-		posTable = new PosTable(this);
-
+		data = Data.getInstance(this);
 	}
 
 
