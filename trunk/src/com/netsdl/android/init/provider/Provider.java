@@ -1,5 +1,6 @@
 package com.netsdl.android.init.provider;
 
+import com.netsdl.android.common.db.DatabaseHelper;
 import com.netsdl.android.init.data.Data;
 
 import android.content.ContentProvider;
@@ -26,7 +27,7 @@ public class Provider extends ContentProvider {
 
 		SQLiteDatabase db = data.storeMaster.getReadableDatabase();
 		Cursor cursor = db.query(data.storeMaster.getTableName(),
-				data.storeMaster.getColumns(), data.storeMaster.getWhereClause(),
+				data.storeMaster.getColumns(), DatabaseHelper.getWhereClause(data.storeMaster.getKeys()),
 				selectionArgs, null, null, null, null);
 
 		return cursor;
