@@ -27,8 +27,12 @@ public class Provider extends ContentProvider {
 
 		SQLiteDatabase db = data.storeMaster.getReadableDatabase();
 		Cursor cursor = db.query(data.storeMaster.getTableName(),
-				data.storeMaster.getColumns(), DatabaseHelper.getWhereClause(data.storeMaster.getKeys()),
+				data.storeMaster.getColumns(),
+				DatabaseHelper.getWhereClause(data.storeMaster.getKeys()),
 				selectionArgs, null, null, null, null);
+		
+		
+		Log.d("Provider", cursor.getCount() + "");
 
 		return cursor;
 	}
