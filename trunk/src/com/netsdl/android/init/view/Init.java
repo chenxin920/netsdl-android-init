@@ -9,6 +9,7 @@ import org.apache.http.client.ClientProtocolException;
 
 import com.netsdl.android.common.Constant;
 import com.netsdl.android.common.Util;
+import com.netsdl.android.common.db.DatabaseHelper;
 import com.netsdl.android.common.db.DbMaster;
 import com.netsdl.android.common.db.PaymentMaster;
 import com.netsdl.android.common.db.SkuMaster;
@@ -77,47 +78,37 @@ public class Init {
 	}
 
 	private boolean setSkuVersion() {
-		Object[] objs = parent.data.dbMaster
-				.getSingleColumn(new Object[] { SkuMaster.TABLE_NAME });
-		String version = (String) parent.data.dbMaster.getColumnValue(objs,
-				DbMaster.COLUMN_VERSION);
-
-		if (version != null) {
-			((TextView) parent.findViewById(R.id.CommodityDataLocalVersion))
-					.setText(version);
-			return true;
-		} else {
-			return false;
-		}
+		return setVersion(SkuMaster.class, R.id.CommodityDataLocalVersion);
 	}
 
 	private boolean setStoreVersion() {
-		Object[] objs = parent.data.dbMaster
-				.getSingleColumn(new Object[] { StoreMaster.TABLE_NAME });
-		String version = (String) parent.data.dbMaster.getColumnValue(objs,
-				DbMaster.COLUMN_VERSION);
-
-		if (version != null) {
-			((TextView) parent.findViewById(R.id.StoreDataLocalVersion))
-					.setText(version);
-			return true;
-		} else {
-			return false;
-		}
+		return setVersion(StoreMaster.class, R.id.StoreDataLocalVersion);
 	}
 
 	private boolean setPaymentVersion() {
-		Object[] objs = parent.data.dbMaster
-				.getSingleColumn(new Object[] { PaymentMaster.TABLE_NAME });
-		String version = (String) parent.data.dbMaster.getColumnValue(objs,
-				DbMaster.COLUMN_VERSION);
-		if (version != null) {
-			((TextView) parent.findViewById(R.id.PaymentDataLocalVersion))
-					.setText(version);
-			return true;
-		} else {
-			return false;
+		return setVersion(PaymentMaster.class, R.id.PaymentDataLocalVersion);
+	}
+
+	private boolean setVersion(Class<?> clazz, int rid) {
+		try {
+			Object[] objs;
+			objs = parent.data.dbMaster
+					.getSingleColumn(new Object[] { (String) clazz.getField(
+							Constant.TABLE_NAME).get(clazz) });
+			String version = (String) DatabaseHelper.getColumnValue(objs,
+					DbMaster.COLUMN_VERSION, DbMaster.COLUMNS);
+			if (version != null) {
+				((TextView) parent.findViewById(rid)).setText(version);
+				return true;
+			} else {
+				return false;
+			}
+		} catch (IllegalArgumentException e) {
+		} catch (SecurityException e) {
+		} catch (IllegalAccessException e) {
+		} catch (NoSuchFieldException e) {
 		}
+		return false;
 	}
 
 	private void initButtonNext() {
@@ -125,14 +116,13 @@ public class Init {
 				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						// parent.login.init();
-						Intent intent = new Intent(
-								"MainActivity");
+						Intent intent = new Intent("MainActivity");
 						parent.startActivity(intent);
 
-//						Intent intent = new Intent();
-//						intent.setClassName("com.netsdl.android.main.view",
-//								"com.netsdl.android.main.view.MainActivity");
-//						parent.startActivity(intent);
+						// Intent intent = new Intent();
+						// intent.setClassName("com.netsdl.android.main.view",
+						// "com.netsdl.android.main.view.MainActivity");
+						// parent.startActivity(intent);
 
 						// ContentResolver contentResolver = parent
 						// .getContentResolver();
