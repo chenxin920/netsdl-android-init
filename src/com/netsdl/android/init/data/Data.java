@@ -12,7 +12,6 @@ import com.netsdl.android.common.db.SkuMaster;
 import com.netsdl.android.common.db.StoreMaster;
 
 public class Data {
-	// private static Map<Context, Data> mapData = new HashMap<Context, Data>();
 	private static Data data;
 
 	public Context context;
@@ -47,10 +46,8 @@ public class Data {
 	}
 
 	public static Data getInstance(Context context) {
-		// Data data = mapData.get(context);
 		if (data == null) {
 			data = new Data(context);
-			// mapData.put(context, data);
 		}
 		return data;
 	}

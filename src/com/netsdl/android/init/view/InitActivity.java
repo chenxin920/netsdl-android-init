@@ -27,7 +27,6 @@ public class InitActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		//setContentView(R.layout.init);
 		init = new Init(this);
 		init.init();
 	}
