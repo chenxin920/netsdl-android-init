@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 
 import com.netsdl.android.common.Constant;
 import com.netsdl.android.common.db.DatabaseHelper;
+import com.netsdl.android.common.db.PaymentMaster;
 import com.netsdl.android.common.db.StoreMaster;
 import com.netsdl.android.init.data.Data;
 
@@ -17,7 +18,8 @@ import android.util.Log;
 
 public class Provider extends ContentProvider {
 
-	private static final Class<?>[] clazzes = new Class<?>[] { StoreMaster.class };
+	private static final Class<?>[] clazzes = new Class<?>[] {
+			StoreMaster.class, PaymentMaster.class };
 	private static final UriMatcher URI_MATCHER = new UriMatcher(
 			UriMatcher.NO_MATCH);
 
@@ -49,18 +51,19 @@ public class Provider extends ContentProvider {
 			String[] selectionArgs, String sortOrder) {
 
 		String type = getType(uri);
-		if(type==null)
+		if (type == null)
 			return null;
 		Field[] fields = data.getClass().getFields();
 		for (Field field : fields) {
-			if(type.equals(field.getType().getName())){
+			if (type.equals(field.getType().getName())) {
 				try {
+					
 					Log.d("aa", field.get(data).toString());
 				} catch (IllegalArgumentException e) {
 				} catch (IllegalAccessException e) {
 				}
 			}
-			
+
 		}
 
 		SQLiteDatabase db = data.storeMaster.getReadableDatabase();
