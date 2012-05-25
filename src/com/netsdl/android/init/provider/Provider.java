@@ -3,6 +3,7 @@ package com.netsdl.android.init.provider;
 import java.lang.reflect.Field;
 
 import com.netsdl.android.common.Constant;
+import com.netsdl.android.common.db.DatabaseHandler;
 import com.netsdl.android.common.db.DatabaseHelper;
 import com.netsdl.android.common.db.PaymentMaster;
 import com.netsdl.android.common.db.StoreMaster;
@@ -57,23 +58,41 @@ public class Provider extends ContentProvider {
 		for (Field field : fields) {
 			if (type.equals(field.getType().getName())) {
 				try {
-					
-					Log.d("aa", field.get(data).toString());
+					DatabaseHandler databaseHandler = (DatabaseHandler) field
+							.get(data);
+					SQLiteDatabase db = databaseHandler.getReadableDatabase();
+					String[] strs = new String[] { null, null, null, null };
+					if (sortOrder != null) {
+						strs = sortOrder.split(Constant.SEMICOLON);
+						for (int i = 0; i < strs.length; i++) {
+							strs[i] = strs[i].trim();
+							if (strs[i].length() == 0)
+								strs[i] = null;
+						}
+					}
+					Log.d("getTableName", databaseHandler.getTableName());
+					Log.d("getColumns", databaseHandler.getColumns().toString());
+					Log.d("getWhereClause", DatabaseHelper
+							.getWhereClause(databaseHandler.getKeys()));
+					Log.d("selectionArgs", selectionArgs == null ? "null"
+							: selectionArgs.length + "");
+					Log.d("selection", selection == null ? "null" : selection);
+					Log.d("sortOrder", sortOrder == null ? "null" : sortOrder);
+
+					Cursor cursor = db.query(databaseHandler.getTableName(),
+							databaseHandler.getColumns(), DatabaseHelper
+									.getWhereClause(databaseHandler.getKeys()),
+							selectionArgs, strs[0], strs[1], strs[2], strs[3]);
+					Log.d("cursor Count", cursor.getCount() + "");
+					return cursor;
 				} catch (IllegalArgumentException e) {
 				} catch (IllegalAccessException e) {
 				}
 			}
 
 		}
+		return null;
 
-		SQLiteDatabase db = data.storeMaster.getReadableDatabase();
-
-		Cursor cursor = db.query(data.storeMaster.getTableName(),
-				data.storeMaster.getColumns(),
-				DatabaseHelper.getWhereClause(data.storeMaster.getKeys()),
-				selectionArgs, null, null, null, null);
-
-		return cursor;
 	}
 
 	@Override
