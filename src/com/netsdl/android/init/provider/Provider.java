@@ -6,6 +6,7 @@ import com.netsdl.android.common.Constant;
 import com.netsdl.android.common.db.DatabaseHandler;
 import com.netsdl.android.common.db.DatabaseHelper;
 import com.netsdl.android.common.db.PaymentMaster;
+import com.netsdl.android.common.db.SkuMaster;
 import com.netsdl.android.common.db.StoreMaster;
 import com.netsdl.android.init.data.Data;
 
@@ -20,7 +21,7 @@ import android.util.Log;
 public class Provider extends ContentProvider {
 
 	private static final Class<?>[] clazzes = new Class<?>[] {
-			StoreMaster.class, PaymentMaster.class };
+			StoreMaster.class, PaymentMaster.class, SkuMaster.class };
 	private static final UriMatcher URI_MATCHER = new UriMatcher(
 			UriMatcher.NO_MATCH);
 
@@ -70,19 +71,11 @@ public class Provider extends ContentProvider {
 								strs[i] = null;
 						}
 					}
-					Log.d("getTableName", databaseHandler.getTableName());
-					Log.d("getColumns", databaseHandler.getColumns().toString());
-					Log.d("getWhereClause", DatabaseHelper
-							.getWhereClause(databaseHandler.getKeys()));
-					Log.d("selectionArgs", selectionArgs == null ? "null"
-							: selectionArgs.length + "");
-					Log.d("selection", selection == null ? "null" : selection);
-					Log.d("sortOrder", sortOrder == null ? "null" : sortOrder);
 
 					Cursor cursor = db.query(databaseHandler.getTableName(),
-							databaseHandler.getColumns(), DatabaseHelper
-									.getWhereClause(databaseHandler.getKeys()),
+							databaseHandler.getColumns(), selection,
 							selectionArgs, strs[0], strs[1], strs[2], strs[3]);
+
 					Log.d("cursor Count", cursor.getCount() + "");
 					return cursor;
 				} catch (IllegalArgumentException e) {
@@ -108,7 +101,25 @@ public class Provider extends ContentProvider {
 
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
-		// TODO Auto-generated method stub
+		
+		String type = getType(uri);
+		if (type == null)
+			return null;
+		Field[] fields = data.getClass().getFields();
+		for (Field field : fields) {
+			if (type.equals(field.getType().getName())) {
+				try {
+					DatabaseHandler databaseHandler = (DatabaseHandler) field
+							.get(data);
+					SQLiteDatabase db = databaseHandler.getWritableDatabase();
+					db.replace(databaseHandler.getTableName(), null, values);
+					return uri;
+				} catch (IllegalArgumentException e) {
+				} catch (IllegalAccessException e) {
+				}
+			}
+
+		}
 		return null;
 	}
 
