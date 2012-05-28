@@ -116,21 +116,33 @@ public class Init {
 				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						// parent.login.init();
-						Intent intent = new Intent("MainActivity");
-						parent.startActivity(intent);
+						// Intent intent = new Intent("MainActivity");
+						// parent.startActivity(intent);
 
 						// Intent intent = new Intent();
 						// intent.setClassName("com.netsdl.android.main.view",
 						// "com.netsdl.android.main.view.MainActivity");
 						// parent.startActivity(intent);
 
-						// ContentResolver contentResolver = parent
-						// .getContentResolver();
-						// Cursor cursor = contentResolver.query(
-						// Uri.parse("content://com.netsdl.android.init.provider.Provider"),
-						// null, null, null, null);
-						// Log.d("cursor",
-						// cursor == null ? "null" : cursor.toString());
+						try {
+							Object[] objs = DatabaseHelper.getSingleColumn(
+									parent.getContentResolver(),
+									new Object[] { "11" },
+									new String[] { SkuMaster.COLUMN_BAR_CODE },
+									StoreMaster.class);
+						} catch (IllegalArgumentException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (SecurityException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IllegalAccessException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (NoSuchFieldException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 
 					}
 				});
@@ -214,27 +226,37 @@ public class Init {
 						commodityProgressDialog
 								.setOnDismissListener(new OnDismissListener() {
 									public void onDismiss(DialogInterface dialog) {
-										if (commodityProgressThread.mState == AbstractProgressThread.STATE_DONE) {
-											parent.data.dbMaster.deleteByKey(new String[] { infoSku
-													.get(Constant.VERSION) });
+										try {
+											if (commodityProgressThread.mState == AbstractProgressThread.STATE_DONE) {
 
-											parent.data.dbMaster.insert(new String[] {
-													SkuMaster.TABLE_NAME,
-													infoSku.get(Constant.VERSION) });
+												parent.data.dbMaster
+														.deleteByKey(new String[] { infoSku
+																.get(Constant.VERSION) });
 
-											setSkuVersion();
-											if (setStoreVersion()
-													&& setPaymentVersion()) {
-												((Button) parent
-														.findViewById(R.id.buttonNext))
-														.setEnabled(true);
-											} else {
-												((Button) parent
-														.findViewById(R.id.buttonNext))
-														.setEnabled(false);
+												parent.data.dbMaster.insert(new String[] {
+														SkuMaster.TABLE_NAME,
+														infoSku.get(Constant.VERSION) });
+
+												setSkuVersion();
+												if (setStoreVersion()
+														&& setPaymentVersion()) {
+													((Button) parent
+															.findViewById(R.id.buttonNext))
+															.setEnabled(true);
+												} else {
+													((Button) parent
+															.findViewById(R.id.buttonNext))
+															.setEnabled(false);
+												}
+
 											}
 
+										} catch (IllegalArgumentException e) {
+										} catch (SecurityException e) {
+										} catch (IllegalAccessException e) {
+										} catch (NoSuchFieldException e) {
 										}
+
 									}
 								});
 
@@ -279,27 +301,35 @@ public class Init {
 						storeProgressDialog
 								.setOnDismissListener(new OnDismissListener() {
 									public void onDismiss(DialogInterface dialog) {
-										if (storeProgressThread.mState == AbstractProgressThread.STATE_DONE) {
-											parent.data.dbMaster.deleteByKey(new String[] { infoStore
-													.get(Constant.VERSION) });
+										try {
+											if (storeProgressThread.mState == AbstractProgressThread.STATE_DONE) {
+												parent.data.dbMaster
+														.deleteByKey(new String[] { infoStore
+																.get(Constant.VERSION) });
+												parent.data.dbMaster.insert(new String[] {
+														StoreMaster.TABLE_NAME,
+														infoStore
+																.get(Constant.VERSION) });
 
-											parent.data.dbMaster.insert(new String[] {
-													StoreMaster.TABLE_NAME,
-													infoStore
-															.get(Constant.VERSION) });
-
-											setStoreVersion();
-											if (setSkuVersion()
-													&& setPaymentVersion()) {
-												((Button) parent
-														.findViewById(R.id.buttonNext))
-														.setEnabled(true);
-											} else {
-												((Button) parent
-														.findViewById(R.id.buttonNext))
-														.setEnabled(false);
+												setStoreVersion();
+												if (setSkuVersion()
+														&& setPaymentVersion()) {
+													((Button) parent
+															.findViewById(R.id.buttonNext))
+															.setEnabled(true);
+												} else {
+													((Button) parent
+															.findViewById(R.id.buttonNext))
+															.setEnabled(false);
+												}
 											}
+
+										} catch (IllegalArgumentException e) {
+										} catch (SecurityException e) {
+										} catch (IllegalAccessException e) {
+										} catch (NoSuchFieldException e) {
 										}
+
 									}
 								});
 
@@ -345,27 +375,36 @@ public class Init {
 						paymentProgressDialog
 								.setOnDismissListener(new OnDismissListener() {
 									public void onDismiss(DialogInterface dialog) {
-										if (paymentProgressThread.mState == AbstractProgressThread.STATE_DONE) {
-											parent.data.dbMaster.deleteByKey(new String[] { infoPayment
-													.get(Constant.VERSION) });
+										try {
+											if (paymentProgressThread.mState == AbstractProgressThread.STATE_DONE) {
+												parent.data.dbMaster
+														.deleteByKey(new String[] { infoPayment
+																.get(Constant.VERSION) });
 
-											parent.data.dbMaster.insert(new String[] {
-													PaymentMaster.TABLE_NAME,
-													infoPayment
-															.get(Constant.VERSION) });
+												parent.data.dbMaster.insert(new String[] {
+														PaymentMaster.TABLE_NAME,
+														infoPayment
+																.get(Constant.VERSION) });
 
-											setPaymentVersion();
-											if (setSkuVersion()
-													&& setStoreVersion()) {
-												((Button) parent
-														.findViewById(R.id.buttonNext))
-														.setEnabled(true);
-											} else {
-												((Button) parent
-														.findViewById(R.id.buttonNext))
-														.setEnabled(false);
+												setPaymentVersion();
+												if (setSkuVersion()
+														&& setStoreVersion()) {
+													((Button) parent
+															.findViewById(R.id.buttonNext))
+															.setEnabled(true);
+												} else {
+													((Button) parent
+															.findViewById(R.id.buttonNext))
+															.setEnabled(false);
+												}
 											}
+
+										} catch (IllegalArgumentException e) {
+										} catch (SecurityException e) {
+										} catch (IllegalAccessException e) {
+										} catch (NoSuchFieldException e) {
 										}
+
 									}
 								});
 
