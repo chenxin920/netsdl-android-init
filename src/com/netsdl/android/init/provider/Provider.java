@@ -6,6 +6,7 @@ import com.netsdl.android.common.Constant;
 import com.netsdl.android.common.db.DatabaseHandler;
 import com.netsdl.android.common.db.DatabaseHelper;
 import com.netsdl.android.common.db.PaymentMaster;
+import com.netsdl.android.common.db.PosTable;
 import com.netsdl.android.common.db.SkuMaster;
 import com.netsdl.android.common.db.StoreMaster;
 import com.netsdl.android.init.data.Data;
@@ -21,7 +22,7 @@ import android.util.Log;
 public class Provider extends ContentProvider {
 
 	private static final Class<?>[] clazzes = new Class<?>[] {
-			StoreMaster.class, PaymentMaster.class, SkuMaster.class };
+			StoreMaster.class, PaymentMaster.class, SkuMaster.class ,PosTable.class};
 	private static final UriMatcher URI_MATCHER = new UriMatcher(
 			UriMatcher.NO_MATCH);
 
