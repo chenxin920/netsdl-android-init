@@ -19,8 +19,14 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.netsdl.android.main.view.MainActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            
+            
         </activity>
-        
+
         <provider
             android:name="com.netsdl.android.init.provider.Provider"
             android:authorities="com.netsdl.android.init.provider.Provider" />

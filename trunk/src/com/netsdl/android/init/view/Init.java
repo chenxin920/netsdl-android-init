@@ -115,34 +115,20 @@ public class Init {
 		((Button) parent.findViewById(R.id.buttonNext))
 				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
-						// parent.login.init();
-						// Intent intent = new Intent("MainActivity");
-						// parent.startActivity(intent);
 
 						// Intent intent = new Intent();
 						// intent.setClassName("com.netsdl.android.main.view",
 						// "com.netsdl.android.main.view.MainActivity");
 						// parent.startActivity(intent);
-
-						try {
-							Object[] objs = DatabaseHelper.getSingleColumn(
-									parent.getContentResolver(),
-									new Object[] { "11" },
-									new String[] { SkuMaster.COLUMN_BAR_CODE },
-									StoreMaster.class);
-						} catch (IllegalArgumentException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (SecurityException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (IllegalAccessException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (NoSuchFieldException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						
+//						Intent i = new Intent("com.netsdl.android.intent.ACTION_VIEW");
+//						i.addCategory(Intent.CATEGORY_DEFAULT);
+//						parent.startActivity(i);
+						
+			            Intent intent =  new  Intent();
+			            intent.setClassName( "com.netsdl.android.main.view" , 
+			                     "com.netsdl.android.main.view.MainActivity" );
+			            parent.startActivity(intent);
 
 					}
 				});
