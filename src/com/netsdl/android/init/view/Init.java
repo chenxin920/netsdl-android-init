@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
+import org.ksoap2.SoapEnvelope;
+import org.ksoap2.serialization.SoapObject;
+import org.ksoap2.serialization.SoapSerializationEnvelope;
+import org.ksoap2.transport.HttpTransportSE;
 
 import com.netsdl.android.common.Constant;
 import com.netsdl.android.common.Util;
@@ -36,6 +40,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class Init {
 	public static final String KEY_SKU = "sku";
@@ -66,7 +71,8 @@ public class Init {
 		initButtonUpdateCommodity();
 		initButtonUpdateStore();
 		initButtonUpdatePayment();
-
+		
+		((Button) parent.findViewById(R.id.buttonNext)).setEnabled(true);
 	}
 
 	private void setVersion() {
@@ -120,17 +126,50 @@ public class Init {
 						// intent.setClassName("com.netsdl.android.main.view",
 						// "com.netsdl.android.main.view.MainActivity");
 						// parent.startActivity(intent);
-						
-//						Intent i = new Intent("com.netsdl.android.intent.ACTION_VIEW");
-//						i.addCategory(Intent.CATEGORY_DEFAULT);
-//						parent.startActivity(i);
-						
-			            Intent intent =  new  Intent();
-			            intent.setClassName( "com.netsdl.android.main.view" , 
-			                     "com.netsdl.android.main.view.MainActivity" );
-			            parent.startActivity(intent);
+
+						// Intent i = new
+						// Intent("com.netsdl.android.intent.ACTION_VIEW");
+						// i.addCategory(Intent.CATEGORY_DEFAULT);
+						// parent.startActivity(i);
+
+						// Intent intent = new Intent();
+						// intent.setClassName( "com.netsdl.android.main.view" ,
+						// "com.netsdl.android.main.view.MainActivity" );
+						// parent.startActivity(intent);
+
+						Log.d("button1", "onClick");
+						SoapObject rpc = new SoapObject(
+								"http://print.web.netsdl.com/", "test");
+						rpc.addProperty("str", "aaab");
+						SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
+								SoapEnvelope.VER10);
+
+						envelope.bodyOut = rpc;
+						envelope.dotNet = true;
+						envelope.setOutputSoapObject(rpc);
+
+						HttpTransportSE ht = new HttpTransportSE(
+								"http://10.0.2.2:8080/NetSDL_WebPrint/wsdl/Util.wsdl");
+						ht.debug = true;
+						try {
+
+							ht.call("http://print.web.netsdl.com/test",
+									envelope);
+
+							SoapObject result = (SoapObject) envelope
+									.getResponse();
+
+							System.out.println("result " + result);
+
+							Toast.makeText(parent, result.toString(),
+									Toast.LENGTH_LONG).show();
+
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 
 					}
+
 				});
 	}
 
