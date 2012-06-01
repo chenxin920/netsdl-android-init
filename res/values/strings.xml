@@ -58,5 +58,6 @@
     <string name="function2">门店查询业务</string>
     <string name="DeleteData">删除POS数据</string>
     <string name="UploadData">上传POS数据</string>
+    <string name="DeviceData">设备数据</string>
     
 </resources>

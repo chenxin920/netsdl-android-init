@@ -6,6 +6,7 @@ import java.util.Map;
 import android.content.Context;
 
 import com.netsdl.android.common.db.DbMaster;
+import com.netsdl.android.common.db.DeviceMaster;
 import com.netsdl.android.common.db.PaymentMaster;
 import com.netsdl.android.common.db.PosTable;
 import com.netsdl.android.common.db.SkuMaster;
@@ -30,6 +31,8 @@ public class Data {
 
 	public PaymentMaster paymentMaster = null;
 
+	public DeviceMaster deviceMaster = null;
+
 	public PosTable posTable = null;
 
 	private Data(Context context) {
@@ -42,6 +45,7 @@ public class Data {
 		skuMaster = new SkuMaster(context);
 		storeMaster = new StoreMaster(context);
 		paymentMaster = new PaymentMaster(context);
+		deviceMaster = new DeviceMaster(context);
 		posTable = new PosTable(context);
 	}
 

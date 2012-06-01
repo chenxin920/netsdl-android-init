@@ -6,23 +6,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
-import org.ksoap2.SoapEnvelope;
-import org.ksoap2.serialization.SoapObject;
-import org.ksoap2.serialization.SoapSerializationEnvelope;
-import org.ksoap2.transport.HttpTransportSE;
+//import org.ksoap2.SoapEnvelope;
+//import org.ksoap2.serialization.SoapObject;
+//import org.ksoap2.serialization.SoapSerializationEnvelope;
+//import org.ksoap2.transport.HttpTransportSE;
 
 import com.netsdl.android.common.Constant;
 import com.netsdl.android.common.Util;
 import com.netsdl.android.common.db.DatabaseHelper;
 import com.netsdl.android.common.db.DbMaster;
+import com.netsdl.android.common.db.DeviceMaster;
 import com.netsdl.android.common.db.PaymentMaster;
 import com.netsdl.android.common.db.SkuMaster;
 import com.netsdl.android.common.db.StoreMaster;
 import com.netsdl.android.common.dialog.progress.AbstractProgressThread;
+import com.netsdl.android.common.dialog.progress.CommonProgressDialog;
 import com.netsdl.android.init.R;
 import com.netsdl.android.init.dialog.progress.commodity.CommodityProgressDialog;
 import com.netsdl.android.init.dialog.progress.commodity.CommodityProgressHandler;
 import com.netsdl.android.init.dialog.progress.commodity.CommodityProgressThread;
+import com.netsdl.android.init.dialog.progress.device.DeviceProgressDialog;
+import com.netsdl.android.init.dialog.progress.device.DeviceProgressHandler;
+import com.netsdl.android.init.dialog.progress.device.DeviceProgressThread;
 import com.netsdl.android.init.dialog.progress.payment.PaymentProgressDialog;
 import com.netsdl.android.init.dialog.progress.payment.PaymentProgressHandler;
 import com.netsdl.android.init.dialog.progress.payment.PaymentProgressThread;
@@ -30,22 +35,18 @@ import com.netsdl.android.init.dialog.progress.store.StoreProgressDialog;
 import com.netsdl.android.init.dialog.progress.store.StoreProgressHandler;
 import com.netsdl.android.init.dialog.progress.store.StoreProgressThread;
 
-import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
-import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class Init {
 	public static final String KEY_SKU = "sku";
 	public static final String STORE = "store";
 	public static final String PAYMENT = "payment";
+	public static final String DEVICE = "device";
 
 	public static final int LAYOUT_INIT = R.layout.init;
 	InitActivity parent;
@@ -53,6 +54,7 @@ public class Init {
 	public Map<String, String> infoSku;
 	public Map<String, String> infoStore;
 	public Map<String, String> infoPayment;
+	public Map<String, String> infoDevice;
 
 	public Init(InitActivity parent) {
 		this.parent = parent;
@@ -60,6 +62,7 @@ public class Init {
 		infoSku = new HashMap<String, String>();
 		infoStore = new HashMap<String, String>();
 		infoPayment = new HashMap<String, String>();
+		infoDevice = new HashMap<String, String>();
 
 	}
 
@@ -71,7 +74,8 @@ public class Init {
 		initButtonUpdateCommodity();
 		initButtonUpdateStore();
 		initButtonUpdatePayment();
-		
+		initButtonUpdateDevice();
+
 		((Button) parent.findViewById(R.id.buttonNext)).setEnabled(true);
 	}
 
@@ -79,8 +83,8 @@ public class Init {
 		boolean canNext = setSkuVersion();
 		canNext &= setStoreVersion();
 		canNext &= setPaymentVersion();
+		canNext &= setDeviceVersion();
 		((Button) parent.findViewById(R.id.buttonNext)).setEnabled(canNext);
-
 	}
 
 	private boolean setSkuVersion() {
@@ -93,6 +97,10 @@ public class Init {
 
 	private boolean setPaymentVersion() {
 		return setVersion(PaymentMaster.class, R.id.PaymentDataLocalVersion);
+	}
+
+	private boolean setDeviceVersion() {
+		return setVersion(DeviceMaster.class, R.id.DeviceDataLocalVersion);
 	}
 
 	private boolean setVersion(Class<?> clazz, int rid) {
@@ -138,36 +146,37 @@ public class Init {
 						// parent.startActivity(intent);
 
 						Log.d("button1", "onClick");
-						SoapObject rpc = new SoapObject(
-								"http://print.web.netsdl.com/", "test");
-						rpc.addProperty("str", "aaab");
-						SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
-								SoapEnvelope.VER10);
-
-						envelope.bodyOut = rpc;
-						envelope.dotNet = true;
-						envelope.setOutputSoapObject(rpc);
-
-						HttpTransportSE ht = new HttpTransportSE(
-								"http://10.0.2.2:8080/NetSDL_WebPrint/wsdl/Util.wsdl");
-						ht.debug = true;
-						try {
-
-							ht.call("http://print.web.netsdl.com/test",
-									envelope);
-
-							SoapObject result = (SoapObject) envelope
-									.getResponse();
-
-							System.out.println("result " + result);
-
-							Toast.makeText(parent, result.toString(),
-									Toast.LENGTH_LONG).show();
-
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-
+						// SoapObject rpc = new SoapObject(
+						// "http://print.web.netsdl.com/", "test");
+						// rpc.addProperty("str", "aaab");
+						// SoapSerializationEnvelope envelope = new
+						// SoapSerializationEnvelope(
+						// SoapEnvelope.VER10);
+						//
+						// envelope.bodyOut = rpc;
+						// envelope.dotNet = true;
+						// envelope.setOutputSoapObject(rpc);
+						//
+						// HttpTransportSE ht = new HttpTransportSE(
+						// "http://10.0.2.2:8080/NetSDL_WebPrint/wsdl/Util.wsdl");
+						// ht.debug = true;
+						// try {
+						//
+						// ht.call("http://print.web.netsdl.com/test",
+						// envelope);
+						//
+						// SoapObject result = (SoapObject) envelope
+						// .getResponse();
+						//
+						// System.out.println("result " + result);
+						//
+						// Toast.makeText(parent, result.toString(),
+						// Toast.LENGTH_LONG).show();
+						//
+						// } catch (Exception e) {
+						// e.printStackTrace();
+						// }
+						//
 					}
 
 				});
@@ -179,6 +188,14 @@ public class Init {
 				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						try {
+							// String strLocalMacAddress =
+							// Util.getLocalMacAddress(parent);
+							// Log.d("LocalMacAddress",strLocalMacAddress);
+
+							String strLocalDeviceId = Util
+									.getLocalDeviceId(parent);
+							Log.d("LocalDeviceId", strLocalDeviceId);
+
 							initInfo = Util.getInitInfo();
 
 							infoSku = Util.getInfo(initInfo.get(Init.KEY_SKU));
@@ -187,6 +204,8 @@ public class Init {
 
 							infoPayment = Util.getInfo(initInfo
 									.get(Init.PAYMENT));
+
+							infoDevice = Util.getInfo(initInfo.get(Init.DEVICE));
 
 							((TextView) parent
 									.findViewById(R.id.CommodityDataHostVersion))
@@ -207,6 +226,13 @@ public class Init {
 									.setText(infoPayment.get(Constant.VERSION));
 							((Button) parent
 									.findViewById(R.id.buttonUpdatePayment))
+									.setEnabled(true);
+
+							((TextView) parent
+									.findViewById(R.id.DeviceDataHostVersion))
+									.setText(infoDevice.get(Constant.VERSION));
+							((Button) parent
+									.findViewById(R.id.buttonUpdateDevice))
 									.setEnabled(true);
 
 						} catch (ClientProtocolException e) {
@@ -262,17 +288,19 @@ public class Init {
 														SkuMaster.TABLE_NAME,
 														infoSku.get(Constant.VERSION) });
 
-												setSkuVersion();
-												if (setStoreVersion()
-														&& setPaymentVersion()) {
-													((Button) parent
-															.findViewById(R.id.buttonNext))
-															.setEnabled(true);
-												} else {
-													((Button) parent
-															.findViewById(R.id.buttonNext))
-															.setEnabled(false);
-												}
+												setVersion();
+//												setSkuVersion();
+//												if (setStoreVersion()
+//														&& setPaymentVersion()
+//														&& setDeviceVersion()) {
+//													((Button) parent
+//															.findViewById(R.id.buttonNext))
+//															.setEnabled(true);
+//												} else {
+//													((Button) parent
+//															.findViewById(R.id.buttonNext))
+//															.setEnabled(false);
+//												}
 
 											}
 
@@ -336,17 +364,18 @@ public class Init {
 														infoStore
 																.get(Constant.VERSION) });
 
-												setStoreVersion();
-												if (setSkuVersion()
-														&& setPaymentVersion()) {
-													((Button) parent
-															.findViewById(R.id.buttonNext))
-															.setEnabled(true);
-												} else {
-													((Button) parent
-															.findViewById(R.id.buttonNext))
-															.setEnabled(false);
-												}
+												setVersion();
+//												setStoreVersion();
+//												if (setSkuVersion()
+//														&& setPaymentVersion()) {
+//													((Button) parent
+//															.findViewById(R.id.buttonNext))
+//															.setEnabled(true);
+//												} else {
+//													((Button) parent
+//															.findViewById(R.id.buttonNext))
+//															.setEnabled(false);
+//												}
 											}
 
 										} catch (IllegalArgumentException e) {
@@ -411,17 +440,18 @@ public class Init {
 														infoPayment
 																.get(Constant.VERSION) });
 
-												setPaymentVersion();
-												if (setSkuVersion()
-														&& setStoreVersion()) {
-													((Button) parent
-															.findViewById(R.id.buttonNext))
-															.setEnabled(true);
-												} else {
-													((Button) parent
-															.findViewById(R.id.buttonNext))
-															.setEnabled(false);
-												}
+												setVersion();
+//												setPaymentVersion();
+//												if (setSkuVersion()
+//														&& setStoreVersion()) {
+//													((Button) parent
+//															.findViewById(R.id.buttonNext))
+//															.setEnabled(true);
+//												} else {
+//													((Button) parent
+//															.findViewById(R.id.buttonNext))
+//															.setEnabled(false);
+//												}
 											}
 
 										} catch (IllegalArgumentException e) {
@@ -437,6 +467,82 @@ public class Init {
 								paymentProgressDialog.hashCode(),
 								paymentProgressDialog);
 						parent.showDialog(paymentProgressDialog.hashCode());
+
+						Log.d("Init", "parent.showDialog");
+
+					}
+				});
+	}
+
+	private void initButtonUpdateDevice() {
+		((Button) parent.findViewById(R.id.buttonUpdateDevice))
+				.setOnClickListener(new View.OnClickListener() {
+					public void onClick(View v) {
+						final DeviceProgressDialog deviceProgressDialog = new DeviceProgressDialog(
+								parent);
+						DeviceProgressHandler deviceProgressHandler = new DeviceProgressHandler(
+								deviceProgressDialog);
+						final DeviceProgressThread deviceProgressThread = new DeviceProgressThread(
+								deviceProgressHandler);
+						deviceProgressThread
+								.setDeviceMaster(parent.data.deviceMaster);
+						deviceProgressThread.setUrl(infoDevice
+								.get(Constant.URL));
+						deviceProgressHandler
+								.setDeviceProgressThread(deviceProgressThread);
+						deviceProgressDialog
+								.setProgressThread(deviceProgressThread);
+
+						int rows;
+						try {
+							rows = Integer.parseInt(infoDevice
+									.get(Constant.ROWS));
+						} catch (NumberFormatException nfe) {
+							rows = 100;
+						}
+						deviceProgressDialog.setProgressMax(rows);
+
+						deviceProgressDialog
+								.setOnDismissListener(new OnDismissListener() {
+									public void onDismiss(DialogInterface dialog) {
+										try {
+											if (deviceProgressThread.mState == AbstractProgressThread.STATE_DONE) {
+												parent.data.dbMaster
+														.deleteByKey(new String[] { infoDevice
+																.get(Constant.VERSION) });
+
+												parent.data.dbMaster.insert(new String[] {
+														DeviceMaster.TABLE_NAME,
+														infoDevice
+																.get(Constant.VERSION) });
+
+												setVersion();
+//												setDeviceVersion();
+//												if (setSkuVersion()
+//														&& setStoreVersion()) {
+//													((Button) parent
+//															.findViewById(R.id.buttonNext))
+//															.setEnabled(true);
+//												} else {
+//													((Button) parent
+//															.findViewById(R.id.buttonNext))
+//															.setEnabled(false);
+//												}
+											}
+
+										} catch (IllegalArgumentException e) {
+										} catch (SecurityException e) {
+										} catch (IllegalAccessException e) {
+										} catch (NoSuchFieldException e) {
+										}
+
+									}
+								});
+
+						parent.mapDialogable.put(
+								deviceProgressDialog.hashCode(),
+								deviceProgressDialog);
+						parent.showDialog(deviceProgressDialog.hashCode());
 
 						Log.d("Init", "parent.showDialog");
 
