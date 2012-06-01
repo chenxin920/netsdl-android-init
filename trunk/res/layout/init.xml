@@ -182,6 +182,40 @@
                     android:enabled="false"
                     android:text="@string/CanUpdate" />
             </LinearLayout>
+            
+             <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:text="@string/DeviceData" />
+
+                <TextView
+                    android:id="@+id/DeviceDataLocalVersion"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/DeviceDataHostVersion"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/buttonUpdateDevice"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:enabled="false"
+                    android:text="@string/CanUpdate" />
+            </LinearLayout>
+            
         </LinearLayout>
 
         <LinearLayout
