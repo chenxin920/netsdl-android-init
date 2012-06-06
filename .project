@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>NetSDL_Init</name>
+	<name>netsdl-android-init</name>
 	<comment></comment>
 	<projects>
-		<project>NetSDL_Common</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

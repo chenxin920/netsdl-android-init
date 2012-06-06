@@ -3,7 +3,9 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@drawable/radialback"
-    android:orientation="vertical" >
+    android:orientation="vertical" 
+    android:id="@+id/init"
+    >
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -250,11 +252,11 @@
                 android:orientation="horizontal" >
 
                 <Button
-                    android:id="@+id/buttonNext"
+                    android:id="@+id/buttonViewConfig"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:enabled="false"
-                    android:text="@string/GotoSystem" />
+                    android:text="@string/ViewConfig" />
             </LinearLayout>
 
             <LinearLayout

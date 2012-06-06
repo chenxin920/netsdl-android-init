@@ -6,33 +6,22 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.net.SocketException;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPReply;
 import org.apache.http.client.ClientProtocolException;
-//import org.ksoap2.SoapEnvelope;
-//import org.ksoap2.serialization.SoapObject;
-//import org.ksoap2.serialization.SoapSerializationEnvelope;
-//import org.ksoap2.transport.HttpTransportSE;
-
 import com.netsdl.android.common.Constant;
 import com.netsdl.android.common.Util;
 import com.netsdl.android.common.db.DatabaseHelper;
 import com.netsdl.android.common.db.DbMaster;
 import com.netsdl.android.common.db.DeviceMaster;
 import com.netsdl.android.common.db.PaymentMaster;
-import com.netsdl.android.common.db.PosTable;
 import com.netsdl.android.common.db.SkuMaster;
 import com.netsdl.android.common.db.StoreMaster;
 import com.netsdl.android.common.dialog.progress.AbstractProgressThread;
-import com.netsdl.android.common.dialog.progress.CommonProgressDialog;
 import com.netsdl.android.init.R;
 import com.netsdl.android.init.dialog.progress.commodity.CommodityProgressDialog;
 import com.netsdl.android.init.dialog.progress.commodity.CommodityProgressHandler;
@@ -47,11 +36,15 @@ import com.netsdl.android.init.dialog.progress.store.StoreProgressDialog;
 import com.netsdl.android.init.dialog.progress.store.StoreProgressHandler;
 import com.netsdl.android.init.dialog.progress.store.StoreProgressThread;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 public class Init {
@@ -81,7 +74,7 @@ public class Init {
 	public void init() {
 		parent.setContentView(LAYOUT_INIT);
 		setVersion();
-		initButtonNext();
+		initButtonViewConfig();
 		initButtonCheckDB();
 		initButtonUpdateCommodity();
 		initButtonUpdateStore();
@@ -89,7 +82,7 @@ public class Init {
 		initButtonUpdateDevice();
 		initUploadData();
 
-		((Button) parent.findViewById(R.id.buttonNext)).setEnabled(true);
+		((Button) parent.findViewById(R.id.buttonViewConfig)).setEnabled(true);
 	}
 
 	private void setVersion() {
@@ -97,7 +90,8 @@ public class Init {
 		canNext &= setStoreVersion();
 		canNext &= setPaymentVersion();
 		canNext &= setDeviceVersion();
-		((Button) parent.findViewById(R.id.buttonNext)).setEnabled(canNext);
+		// ((Button)
+		// parent.findViewById(R.id.buttonViewConfig)).setEnabled(canNext);
 	}
 
 	private boolean setSkuVersion() {
@@ -143,6 +137,7 @@ public class Init {
 		((Button) parent.findViewById(R.id.buttonUploadData))
 				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
+
 						SimpleDateFormat sdf = new SimpleDateFormat(
 								"yyyyMMddHHmmssSSS");
 						Calendar now = Calendar.getInstance();
@@ -157,10 +152,7 @@ public class Init {
 						PrintStream output = null;
 						FileInputStream input = null;
 
-						FTPClient ftpClient = null;
-
 						try {
-							ftpClient = new FTPClient();
 							output = new PrintStream(filepath
 									+ File.separatorChar + filename,
 									Constant.UTF_8);
@@ -181,26 +173,26 @@ public class Init {
 							output.close();
 							output = null;
 
-							ftpClient.connect("cyr.dip.jp");
-							ftpClient.login("netsdl", "netsdl");
-							Log.d("ftp", ftpClient.getReplyString());
-
-							int reply = ftpClient.getReplyCode();
-							if (!FTPReply.isPositiveCompletion(reply)) {
-								ftpClient.disconnect();
-								ftpClient = null;
-								Log.d("ftp", "FTP server refused connection.");
-								return;
+							Object[] objs = parent.data.deviceMaster.getSingleColumn(
+									new String[] { "9",
+											Util.getLocalDeviceId(parent) },
+									new String[] { DeviceMaster.COLUMN_INIT_ID,
+											DeviceMaster.COLUMN_DEVICE_ID });
+							if (objs != null) {
+								String ftpUrl = DatabaseHelper.getColumnValue(
+										objs, DeviceMaster.COLUMN_FIELD_14,
+										DeviceMaster.COLUMNS).toString();
+								String ftpUser = DatabaseHelper.getColumnValue(
+										objs, DeviceMaster.COLUMN_FIELD_15,
+										DeviceMaster.COLUMNS).toString();
+								String ftpPassword = DatabaseHelper
+										.getColumnValue(objs,
+												DeviceMaster.COLUMN_FIELD_16,
+												DeviceMaster.COLUMNS)
+										.toString();
+								Util.ftpUpload(filepath, filename, ftpUrl,
+										ftpUser, ftpPassword);
 							}
-
-							ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-							ftpClient.enterLocalPassiveMode();
-
-							input = new FileInputStream(filepath
-									+ File.separatorChar + filename);
-							ftpClient.storeFile(filename, input);
-
-							ftpClient.logout();
 
 						} catch (IllegalArgumentException e) {
 						} catch (SecurityException e) {
@@ -208,8 +200,6 @@ public class Init {
 						} catch (NoSuchFieldException e) {
 						} catch (FileNotFoundException e) {
 						} catch (UnsupportedEncodingException e) {
-						} catch (SocketException e) {
-						} catch (IOException e) {
 						} finally {
 							if (input != null) {
 								try {
@@ -222,15 +212,6 @@ public class Init {
 								output.close();
 								output = null;
 							}
-							if (ftpClient != null) {
-								if (ftpClient.isConnected()) {
-									try {
-										ftpClient.disconnect();
-									} catch (IOException e) {
-									}
-									ftpClient = null;
-								}
-							}
 
 						}
 
@@ -238,10 +219,12 @@ public class Init {
 				});
 	}
 
-	private void initButtonNext() {
-		((Button) parent.findViewById(R.id.buttonNext))
+	private void initButtonViewConfig() {
+		((Button) parent.findViewById(R.id.buttonViewConfig))
 				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
+
+						popupConfigWindow();
 
 						// Intent intent = new Intent();
 						// intent.setClassName("com.netsdl.android.main.view",
@@ -258,7 +241,6 @@ public class Init {
 						// "com.netsdl.android.main.view.MainActivity" );
 						// parent.startActivity(intent);
 
-						Log.d("button1", "onClick");
 						// SoapObject rpc = new SoapObject(
 						// "http://print.web.netsdl.com/", "test");
 						// rpc.addProperty("str", "aaab");
@@ -661,6 +643,36 @@ public class Init {
 
 					}
 				});
+	}
+
+	private void popupConfigWindow() {
+		LayoutInflater layoutInflater = (LayoutInflater) parent
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View view = layoutInflater.inflate(R.layout.config, null);
+
+		((TextView) view.findViewById(R.id.deviceid)).setText(Util
+				.getLocalDeviceId(parent));
+		((TextView) view.findViewById(R.id.mac)).setText(Util
+				.getLocalMacAddress(parent));
+		((TextView) view.findViewById(R.id.ip)).setText(Util
+				.getIpAddress(parent));
+
+		((TextView) view.findViewById(R.id.ip)).setText(Util
+				.getIpAddress(parent));
+
+		final PopupWindow popupWindow = new PopupWindow(view, parent
+				.getWindowManager().getDefaultDisplay().getWidth() / 2, parent
+				.getWindowManager().getDefaultDisplay().getHeight() / 2);
+
+		((Button) view.findViewById(R.id.close))
+				.setOnClickListener(new View.OnClickListener() {
+					public void onClick(View v) {
+						popupWindow.dismiss();
+					}
+				});
+
+		popupWindow.showAtLocation(parent.findViewById(R.id.init),
+				Gravity.CENTER, 0, 0);
 	}
 
 }

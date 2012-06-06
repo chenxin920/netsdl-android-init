@@ -59,5 +59,6 @@
     <string name="DeleteData">删除POS数据</string>
     <string name="UploadData">上传POS数据</string>
     <string name="DeviceData">设备数据</string>
-    
+    <string name="ViewConfig">查看配置</string>
+
 </resources>
