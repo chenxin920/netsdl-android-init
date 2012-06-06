@@ -1,10 +1,21 @@
 package com.netsdl.android.init.view;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.net.SocketException;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPReply;
 import org.apache.http.client.ClientProtocolException;
 //import org.ksoap2.SoapEnvelope;
 //import org.ksoap2.serialization.SoapObject;
@@ -17,6 +28,7 @@ import com.netsdl.android.common.db.DatabaseHelper;
 import com.netsdl.android.common.db.DbMaster;
 import com.netsdl.android.common.db.DeviceMaster;
 import com.netsdl.android.common.db.PaymentMaster;
+import com.netsdl.android.common.db.PosTable;
 import com.netsdl.android.common.db.SkuMaster;
 import com.netsdl.android.common.db.StoreMaster;
 import com.netsdl.android.common.dialog.progress.AbstractProgressThread;
@@ -75,6 +87,7 @@ public class Init {
 		initButtonUpdateStore();
 		initButtonUpdatePayment();
 		initButtonUpdateDevice();
+		initUploadData();
 
 		((Button) parent.findViewById(R.id.buttonNext)).setEnabled(true);
 	}
@@ -123,6 +136,106 @@ public class Init {
 		} catch (NoSuchFieldException e) {
 		}
 		return false;
+	}
+
+	private void initUploadData() {
+
+		((Button) parent.findViewById(R.id.buttonUploadData))
+				.setOnClickListener(new View.OnClickListener() {
+					public void onClick(View v) {
+						SimpleDateFormat sdf = new SimpleDateFormat(
+								"yyyyMMddHHmmssSSS");
+						Calendar now = Calendar.getInstance();
+						now.setTimeInMillis(System.currentTimeMillis());
+						String timestamp = sdf.format(now.getTime());
+
+						String localDeviceId = Util.getLocalDeviceId(parent);
+						String filepath = parent.getFilesDir().getPath()
+								.toString();
+						String filename = localDeviceId + "." + timestamp;
+
+						PrintStream output = null;
+						FileInputStream input = null;
+
+						FTPClient ftpClient = null;
+
+						try {
+							ftpClient = new FTPClient();
+							output = new PrintStream(filepath
+									+ File.separatorChar + filename,
+									Constant.UTF_8);
+							Object[][] objss = parent.data.posTable
+									.getMultiColumn(null, null, null, null);
+							if (objss == null || objss.length == 0)
+								return;
+							for (int i = 0; i < objss.length; i++) {
+								for (int j = 0; j < objss[i].length; j++) {
+									output.print(objss[i][j]);
+									if (j != objss[i].length - 1) {
+										output.print(',');
+									}
+								}
+								output.println();
+								output.flush();
+							}
+							output.close();
+							output = null;
+
+							ftpClient.connect("cyr.dip.jp");
+							ftpClient.login("netsdl", "netsdl");
+							Log.d("ftp", ftpClient.getReplyString());
+
+							int reply = ftpClient.getReplyCode();
+							if (!FTPReply.isPositiveCompletion(reply)) {
+								ftpClient.disconnect();
+								ftpClient = null;
+								Log.d("ftp", "FTP server refused connection.");
+								return;
+							}
+
+							ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+							ftpClient.enterLocalPassiveMode();
+
+							input = new FileInputStream(filepath
+									+ File.separatorChar + filename);
+							ftpClient.storeFile(filename, input);
+
+							ftpClient.logout();
+
+						} catch (IllegalArgumentException e) {
+						} catch (SecurityException e) {
+						} catch (IllegalAccessException e) {
+						} catch (NoSuchFieldException e) {
+						} catch (FileNotFoundException e) {
+						} catch (UnsupportedEncodingException e) {
+						} catch (SocketException e) {
+						} catch (IOException e) {
+						} finally {
+							if (input != null) {
+								try {
+									input.close();
+								} catch (IOException e) {
+								}
+								input = null;
+							}
+							if (output != null) {
+								output.close();
+								output = null;
+							}
+							if (ftpClient != null) {
+								if (ftpClient.isConnected()) {
+									try {
+										ftpClient.disconnect();
+									} catch (IOException e) {
+									}
+									ftpClient = null;
+								}
+							}
+
+						}
+
+					}
+				});
 	}
 
 	private void initButtonNext() {
@@ -289,18 +402,18 @@ public class Init {
 														infoSku.get(Constant.VERSION) });
 
 												setVersion();
-//												setSkuVersion();
-//												if (setStoreVersion()
-//														&& setPaymentVersion()
-//														&& setDeviceVersion()) {
-//													((Button) parent
-//															.findViewById(R.id.buttonNext))
-//															.setEnabled(true);
-//												} else {
-//													((Button) parent
-//															.findViewById(R.id.buttonNext))
-//															.setEnabled(false);
-//												}
+												// setSkuVersion();
+												// if (setStoreVersion()
+												// && setPaymentVersion()
+												// && setDeviceVersion()) {
+												// ((Button) parent
+												// .findViewById(R.id.buttonNext))
+												// .setEnabled(true);
+												// } else {
+												// ((Button) parent
+												// .findViewById(R.id.buttonNext))
+												// .setEnabled(false);
+												// }
 
 											}
 
@@ -365,17 +478,17 @@ public class Init {
 																.get(Constant.VERSION) });
 
 												setVersion();
-//												setStoreVersion();
-//												if (setSkuVersion()
-//														&& setPaymentVersion()) {
-//													((Button) parent
-//															.findViewById(R.id.buttonNext))
-//															.setEnabled(true);
-//												} else {
-//													((Button) parent
-//															.findViewById(R.id.buttonNext))
-//															.setEnabled(false);
-//												}
+												// setStoreVersion();
+												// if (setSkuVersion()
+												// && setPaymentVersion()) {
+												// ((Button) parent
+												// .findViewById(R.id.buttonNext))
+												// .setEnabled(true);
+												// } else {
+												// ((Button) parent
+												// .findViewById(R.id.buttonNext))
+												// .setEnabled(false);
+												// }
 											}
 
 										} catch (IllegalArgumentException e) {
@@ -441,17 +554,17 @@ public class Init {
 																.get(Constant.VERSION) });
 
 												setVersion();
-//												setPaymentVersion();
-//												if (setSkuVersion()
-//														&& setStoreVersion()) {
-//													((Button) parent
-//															.findViewById(R.id.buttonNext))
-//															.setEnabled(true);
-//												} else {
-//													((Button) parent
-//															.findViewById(R.id.buttonNext))
-//															.setEnabled(false);
-//												}
+												// setPaymentVersion();
+												// if (setSkuVersion()
+												// && setStoreVersion()) {
+												// ((Button) parent
+												// .findViewById(R.id.buttonNext))
+												// .setEnabled(true);
+												// } else {
+												// ((Button) parent
+												// .findViewById(R.id.buttonNext))
+												// .setEnabled(false);
+												// }
 											}
 
 										} catch (IllegalArgumentException e) {
@@ -517,17 +630,17 @@ public class Init {
 																.get(Constant.VERSION) });
 
 												setVersion();
-//												setDeviceVersion();
-//												if (setSkuVersion()
-//														&& setStoreVersion()) {
-//													((Button) parent
-//															.findViewById(R.id.buttonNext))
-//															.setEnabled(true);
-//												} else {
-//													((Button) parent
-//															.findViewById(R.id.buttonNext))
-//															.setEnabled(false);
-//												}
+												// setDeviceVersion();
+												// if (setSkuVersion()
+												// && setStoreVersion()) {
+												// ((Button) parent
+												// .findViewById(R.id.buttonNext))
+												// .setEnabled(true);
+												// } else {
+												// ((Button) parent
+												// .findViewById(R.id.buttonNext))
+												// .setEnabled(false);
+												// }
 											}
 
 										} catch (IllegalArgumentException e) {
