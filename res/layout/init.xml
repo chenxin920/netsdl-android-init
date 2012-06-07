@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/init"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@drawable/radialback"
-    android:orientation="vertical" 
-    android:id="@+id/init"
-    >
+    android:orientation="vertical" >
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -184,8 +183,8 @@
                     android:enabled="false"
                     android:text="@string/CanUpdate" />
             </LinearLayout>
-            
-             <LinearLayout
+
+            <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_weight="1"
@@ -217,7 +216,6 @@
                     android:enabled="false"
                     android:text="@string/CanUpdate" />
             </LinearLayout>
-            
         </LinearLayout>
 
         <LinearLayout
@@ -274,6 +272,7 @@
                         android:id="@+id/buttonDeleteData"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
+                        android:enabled="false"
                         android:text="@string/DeleteData" />
                 </LinearLayout>
 
