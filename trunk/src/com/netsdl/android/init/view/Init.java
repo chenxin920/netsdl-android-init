@@ -657,8 +657,10 @@ public class Init {
 		((TextView) view.findViewById(R.id.ip)).setText(Util
 				.getIpAddress(parent));
 
-		((TextView) view.findViewById(R.id.ip)).setText(Util
-				.getIpAddress(parent));
+		// ((TextView) view.findViewById(R.id.ip)).setText(Util
+		// .getIpAddress(parent));
+		((TextView) view.findViewById(R.id.externalStorageDirectory))
+				.setText(Util.ExternalStorageDirectory());
 
 		final PopupWindow popupWindow = new PopupWindow(view, parent
 				.getWindowManager().getDefaultDisplay().getWidth() / 2, parent

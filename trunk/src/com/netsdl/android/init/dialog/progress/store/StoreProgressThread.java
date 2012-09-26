@@ -9,6 +9,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import com.netsdl.android.common.Constant;
+import com.netsdl.android.common.Util;
 import com.netsdl.android.common.db.StoreMaster;
 import com.netsdl.android.common.dialog.progress.AbstractProgressThread;
 
@@ -30,13 +32,8 @@ public class StoreProgressThread extends AbstractProgressThread {
 			setState(STATE_CANCEL);
 			return;
 		}
-		HttpClient client = new DefaultHttpClient();
-		HttpGet request = new HttpGet();
-		request.setURI(new URI(url));
-		HttpResponse response = client.execute(request);
-		in = new BufferedReader(new InputStreamReader(response.getEntity()
-				.getContent(), "UTF-8"));
-
+		
+		in = Util.getBufferedReaderFromURI(url,Constant.UTF_8);
 		line = in.readLine();
 
 	}
