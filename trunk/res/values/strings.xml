@@ -2,7 +2,7 @@
 <resources>
 
     <string name="hello">Hello World, NetSDLActivity!</string>
-    <string name="app_name">NetSDL POS 初期化</string>
+    <string name="app_name">NetSDL smart POS 初期化</string>
     <string name="blank"></string>
     <string name="operaterID">用户编号输入</string>
     <string name="username">用户名</string>
