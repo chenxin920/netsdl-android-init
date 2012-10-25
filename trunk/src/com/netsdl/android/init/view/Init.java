@@ -180,6 +180,9 @@ public class Init {
 											DeviceMaster.COLUMN_DEVICE_ID });
 							if (objs != null) {
 								String ftpUrl = DatabaseHelper.getColumnValue(
+										objs, DeviceMaster.COLUMN_FIELD_13,
+										DeviceMaster.COLUMNS).toString();
+								String ftpPath = DatabaseHelper.getColumnValue(
 										objs, DeviceMaster.COLUMN_FIELD_14,
 										DeviceMaster.COLUMNS).toString();
 								String ftpUser = DatabaseHelper.getColumnValue(
@@ -191,7 +194,7 @@ public class Init {
 												DeviceMaster.COLUMNS)
 										.toString();
 								Util.ftpUpload(filepath, filename, ftpUrl,
-										ftpUser, ftpPassword);
+										ftpPath, ftpUser, ftpPassword);
 							}
 
 						} catch (IllegalArgumentException e) {
