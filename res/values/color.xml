@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+
+    <drawable name="darkgray">#8080FF</drawable>
+    <drawable name="white">#FFFFFF</drawable>
+    <drawable name="black">#000000</drawable>
+    <drawable name="red">#FF0000</drawable>
+    <drawable name="blue">#0000FF</drawable>
+    <drawable name="yellow">#FEF693</drawable>
+    <drawable name="deep_yellow">#FF9900</drawable>
+    <drawable name="weak_yellow">#FE9B21</drawable>
+    <drawable name="tollbar_text_color">#B1B1B1</drawable>
+    <drawable name="deep_green">#006400</drawable>
+    <drawable name="maroon">#800000</drawable>
+    <drawable name="dark_slate_blue">#483D8B</drawable>
+    <drawable name="crimson">#DC143C</drawable>
+    
+</resources>
