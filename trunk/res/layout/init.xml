@@ -10,7 +10,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="3"
-        android:orientation="horizontal" >
+        android:orientation="horizontal" > 
 
         <LinearLayout
             android:layout_width="fill_parent"
@@ -106,28 +106,28 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="1"
                     android:orientation="horizontal" >
-
+
                     <TextView
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
                         android:text="@string/CommodityData"
-                        android:textColor="@drawable/black" />
-
+                        android:textColor="@drawable/white" />
+
                     <TextView
                         android:id="@+id/CommodityDataLocalVersion"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
-                        android:textColor="@drawable/black" />
-
+                        android:textColor="@drawable/white" />
+
                     <TextView
                         android:id="@+id/CommodityDataHostVersion"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
-                        android:textColor="@drawable/black" />
-
+                        android:textColor="@drawable/white" />
+
                     <Button
                         android:id="@+id/buttonUpdateCommodity"
                         android:layout_width="fill_parent"
@@ -136,7 +136,8 @@
                         android:enabled="false"
                         android:text="@string/CanUpdate"
                         android:textColor="@drawable/black"
-                        android:textSize="15dp" />
+                        android:textSize="10dp" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -144,27 +145,27 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="1"
                     android:orientation="horizontal" >
-
+
                     <TextView
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
                         android:text="@string/StoreData"
-                        android:textColor="@drawable/black" />
-
+                        android:textColor="@drawable/white" />
+
                     <TextView
                         android:id="@+id/StoreDataLocalVersion"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
-                        android:textColor="@drawable/black" />
-
+                        android:textColor="@drawable/white" />
+
                     <TextView
                         android:id="@+id/StoreDataHostVersion"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
-                        android:textColor="@drawable/black" />
+                        android:textColor="@drawable/white" />
 
                     <Button
                         android:id="@+id/buttonUpdateStore"
@@ -174,7 +175,7 @@
                         android:enabled="false"
                         android:text="@string/CanUpdate"
                         android:textColor="@drawable/black"
-                        android:textSize="15dp" />
+                        android:textSize="10dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -182,27 +183,27 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="1"
                     android:orientation="horizontal" >
-
+
                     <TextView
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
                         android:text="@string/PaymentData"
-                        android:textColor="@drawable/black" />
-
+                        android:textColor="@drawable/white" />
+
                     <TextView
                         android:id="@+id/PaymentDataLocalVersion"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
-                        android:textColor="@drawable/black" />
-
+                        android:textColor="@drawable/white" />
+
                     <TextView
                         android:id="@+id/PaymentDataHostVersion"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
-                        android:textColor="@drawable/black" />
+                        android:textColor="@drawable/white" />
 
                     <Button
                         android:id="@+id/buttonUpdatePayment"
@@ -212,7 +213,7 @@
                         android:enabled="false"
                         android:text="@string/CanUpdate"
                         android:textColor="@drawable/black"
-                        android:textSize="15dp" />
+                        android:textSize="10dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -220,27 +221,27 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="1"
                     android:orientation="horizontal" >
-
+
                     <TextView
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
                         android:text="@string/DeviceData"
-                        android:textColor="@drawable/black" />
-
+                        android:textColor="@drawable/white" />
+
                     <TextView
                         android:id="@+id/DeviceDataLocalVersion"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
-                        android:textColor="@drawable/black" />
-
+                        android:textColor="@drawable/white" />
+
                     <TextView
                         android:id="@+id/DeviceDataHostVersion"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:layout_weight="1"
-                        android:textColor="@drawable/black" />
+                        android:textColor="@drawable/white" />
 
                     <Button
                         android:id="@+id/buttonUpdateDevice"
@@ -250,7 +251,7 @@
                         android:enabled="false"
                         android:text="@string/CanUpdate"
                         android:textColor="@drawable/black"
-                        android:textSize="15dp" />
+                        android:textSize="10dp" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

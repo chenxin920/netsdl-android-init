@@ -19,6 +19,7 @@ import com.netsdl.android.common.db.DatabaseHelper;
 import com.netsdl.android.common.db.DbMaster;
 import com.netsdl.android.common.db.DeviceMaster;
 import com.netsdl.android.common.db.PaymentMaster;
+import com.netsdl.android.common.db.PosTable;
 import com.netsdl.android.common.db.SkuMaster;
 import com.netsdl.android.common.db.StoreMaster;
 import com.netsdl.android.common.dialog.progress.AbstractProgressThread;
@@ -85,7 +86,7 @@ public class Init {
 		((Button) parent.findViewById(R.id.buttonViewConfig)).setEnabled(true);
 	}
 
-	private void setVersion() {
+	private void setVersion() { 
 		boolean canNext = setSkuVersion();
 		canNext &= setStoreVersion();
 		canNext &= setPaymentVersion();
@@ -137,7 +138,6 @@ public class Init {
 		((Button) parent.findViewById(R.id.buttonUploadData))
 				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
-
 						SimpleDateFormat sdf = new SimpleDateFormat(
 								"yyyyMMddHHmmssSSS");
 						Calendar now = Calendar.getInstance();
@@ -156,14 +156,17 @@ public class Init {
 							output = new PrintStream(filepath
 									+ File.separatorChar + filename,
 									Constant.UTF_8);
+							//取未日结的数据
 							Object[][] objss = parent.data.posTable
-									.getMultiColumn(null, null, null, null);
+									.getMultiColumn(new String[]{"0"},
+											new String[]{PosTable.COLUMN_END_DAY}, null, null,
+											new String[]{PosTable.COLUMN_CREATE_DATE}, null, true);
 							if (objss == null || objss.length == 0)
 								return;
 							for (int i = 0; i < objss.length; i++) {
-								for (int j = 0; j < objss[i].length; j++) {
+								for (int j = 0; j < objss[i].length-1; j++) {
 									output.print(objss[i][j]);
-									if (j != objss[i].length - 1) {
+									if (j != objss[i].length - 2) {
 										output.print(',');
 									}
 								}
@@ -172,7 +175,6 @@ public class Init {
 							}
 							output.close();
 							output = null;
-
 							Object[] objs = parent.data.deviceMaster.getSingleColumn(
 									new String[] { "9",
 											Util.getLocalDeviceId(parent) },
@@ -195,6 +197,11 @@ public class Init {
 										.toString();
 								Util.ftpUpload(filepath, filename, ftpUrl,
 										ftpPath, ftpUser, ftpPassword);
+
+								//更新日结标记
+								Map<String, Object> mapData = new HashMap<String, Object>();
+								mapData.put(PosTable.COLUMN_END_DAY, 1);
+								parent.data.posTable.update(mapData, new String[]{"0"}, new String[]{PosTable.COLUMN_END_DAY});
 							}
 
 						} catch (IllegalArgumentException e) {
@@ -292,7 +299,7 @@ public class Init {
 
 							String strLocalDeviceId = Util
 									.getLocalDeviceId(parent);
-							Log.d("LocalDeviceId", strLocalDeviceId);
+							//Log.d("LocalDeviceId", strLocalDeviceId);
 
 							initInfo = Util.getInitInfo();
 
