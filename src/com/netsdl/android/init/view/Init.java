@@ -7,12 +7,39 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
+
+import android.annotation.SuppressLint;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.app.DatePickerDialog;
+import android.app.DatePickerDialog.OnDateSetListener;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.DialogInterface.OnDismissListener;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+
 import com.netsdl.android.common.Constant;
 import com.netsdl.android.common.Util;
 import com.netsdl.android.common.db.DatabaseHelper;
@@ -36,17 +63,6 @@ import com.netsdl.android.init.dialog.progress.payment.PaymentProgressThread;
 import com.netsdl.android.init.dialog.progress.store.StoreProgressDialog;
 import com.netsdl.android.init.dialog.progress.store.StoreProgressHandler;
 import com.netsdl.android.init.dialog.progress.store.StoreProgressThread;
-
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnDismissListener;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
-import android.widget.PopupWindow;
-import android.widget.TextView;
 
 public class Init {
 	public static final String KEY_SKU = "sku";
@@ -76,6 +92,7 @@ public class Init {
 		parent.setContentView(LAYOUT_INIT);
 		setVersion();
 		initButtonViewConfig();
+		initButtonSaleDate();
 		initButtonCheckDB();
 		initButtonUpdateCommodity();
 		initButtonUpdateStore();
@@ -86,7 +103,7 @@ public class Init {
 		((Button) parent.findViewById(R.id.buttonViewConfig)).setEnabled(true);
 	}
 
-	private void setVersion() { 
+	private void setVersion() {
 		boolean canNext = setSkuVersion();
 		canNext &= setStoreVersion();
 		canNext &= setPaymentVersion();
@@ -138,95 +155,215 @@ public class Init {
 		((Button) parent.findViewById(R.id.buttonUploadData))
 				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
-						SimpleDateFormat sdf = new SimpleDateFormat(
-								"yyyyMMddHHmmssSSS");
-						Calendar now = Calendar.getInstance();
-						now.setTimeInMillis(System.currentTimeMillis());
-						String timestamp = sdf.format(now.getTime());
-
-						String localDeviceId = Util.getLocalDeviceId(parent);
-						String filepath = parent.getFilesDir().getPath()
-								.toString();
-						String filename = localDeviceId + "." + timestamp;
-
-						PrintStream output = null;
-						FileInputStream input = null;
-
-						try {
-							output = new PrintStream(filepath
-									+ File.separatorChar + filename,
-									Constant.UTF_8);
-							//取未日结的数据
-							Object[][] objss = parent.data.posTable
-									.getMultiColumn(new String[]{"0"},
-											new String[]{PosTable.COLUMN_END_DAY}, null, null,
-											new String[]{PosTable.COLUMN_CREATE_DATE}, null, true);
-							if (objss == null || objss.length == 0)
-								return;
-							for (int i = 0; i < objss.length; i++) {
-								for (int j = 0; j < objss[i].length-1; j++) {
-									output.print(objss[i][j]);
-									if (j != objss[i].length - 2) {
-										output.print(',');
-									}
-								}
-								output.println();
-								output.flush();
+						AlertDialog.Builder builder = new Builder(parent);
+						builder.setMessage("确认日结吗？");
+						builder.setTitle("提示");
+						builder.setPositiveButton("确认", new OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int which) {
+								dialog.dismiss();
+								endDay();
 							}
-							output.close();
-							output = null;
-							Object[] objs = parent.data.deviceMaster.getSingleColumn(
-									new String[] { "9",
-											Util.getLocalDeviceId(parent) },
-									new String[] { DeviceMaster.COLUMN_INIT_ID,
-											DeviceMaster.COLUMN_DEVICE_ID });
-							if (objs != null) {
-								String ftpUrl = DatabaseHelper.getColumnValue(
-										objs, DeviceMaster.COLUMN_FIELD_13,
-										DeviceMaster.COLUMNS).toString();
-								String ftpPath = DatabaseHelper.getColumnValue(
-										objs, DeviceMaster.COLUMN_FIELD_14,
-										DeviceMaster.COLUMNS).toString();
-								String ftpUser = DatabaseHelper.getColumnValue(
-										objs, DeviceMaster.COLUMN_FIELD_15,
-										DeviceMaster.COLUMNS).toString();
-								String ftpPassword = DatabaseHelper
-										.getColumnValue(objs,
-												DeviceMaster.COLUMN_FIELD_16,
-												DeviceMaster.COLUMNS)
-										.toString();
-								Util.ftpUpload(filepath, filename, ftpUrl,
-										ftpPath, ftpUser, ftpPassword);
-
-								//更新日结标记
-								Map<String, Object> mapData = new HashMap<String, Object>();
-								mapData.put(PosTable.COLUMN_END_DAY, 1);
-								parent.data.posTable.update(mapData, new String[]{"0"}, new String[]{PosTable.COLUMN_END_DAY});
+						});
+						builder.setNegativeButton("取消", new OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int which) {
+								dialog.dismiss();
 							}
-
-						} catch (IllegalArgumentException e) {
-						} catch (SecurityException e) {
-						} catch (IllegalAccessException e) {
-						} catch (NoSuchFieldException e) {
-						} catch (FileNotFoundException e) {
-						} catch (UnsupportedEncodingException e) {
-						} finally {
-							if (input != null) {
-								try {
-									input.close();
-								} catch (IOException e) {
-								}
-								input = null;
-							}
-							if (output != null) {
-								output.close();
-								output = null;
-							}
-
-						}
-
+						});
+						builder.create().show();
 					}
 				});
+	}
+
+	// 日结功能
+	private void endDay() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+		Calendar now = Calendar.getInstance();
+		now.setTimeInMillis(System.currentTimeMillis());
+		String timestamp = sdf.format(now.getTime());
+
+		String localDeviceId = Util.getLocalDeviceId(parent);
+		String filepath = parent.getFilesDir().getPath().toString();
+		String filename = localDeviceId + "." + timestamp;
+
+		PrintStream output = null;
+		FileInputStream input = null;
+
+		try {
+			output = new PrintStream(filepath + File.separatorChar + filename,
+					Constant.UTF_8);
+			// 取未日结的数据
+			Object[][] objss = parent.data.posTable.getMultiColumn(
+					new String[] { "0" },
+					new String[] { PosTable.COLUMN_END_DAY }, null, null,
+					new String[] { PosTable.COLUMN_CREATE_DATE }, null, true);
+			if (objss == null || objss.length == 0) {
+				// 没数据营业日期也增加
+				addSaleDate();
+				return;
+			}
+			for (int i = 0; i < objss.length; i++) {
+				for (int j = 0; j < objss[i].length - 1; j++) {
+					output.print(objss[i][j]);
+					if (j != objss[i].length - 2) {
+						output.print(',');
+					}
+				}
+				output.println();
+				output.flush();
+			}
+			output.close();
+			output = null;
+			Object[] objs = parent.data.deviceMaster.getSingleColumn(
+					new String[] { "9", Util.getLocalDeviceId(parent) },
+					new String[] { DeviceMaster.COLUMN_INIT_ID,
+							DeviceMaster.COLUMN_DEVICE_ID });
+			if (objs != null) {
+				String ftpUrl = DatabaseHelper.getColumnValue(objs,
+						DeviceMaster.COLUMN_FIELD_13, DeviceMaster.COLUMNS)
+						.toString();
+				String ftpPath = DatabaseHelper.getColumnValue(objs,
+						DeviceMaster.COLUMN_FIELD_14, DeviceMaster.COLUMNS)
+						.toString();
+				String ftpUser = DatabaseHelper.getColumnValue(objs,
+						DeviceMaster.COLUMN_FIELD_15, DeviceMaster.COLUMNS)
+						.toString();
+				String ftpPassword = DatabaseHelper.getColumnValue(objs,
+						DeviceMaster.COLUMN_FIELD_16, DeviceMaster.COLUMNS)
+						.toString();
+				// 上传数据
+				Util.ftpUpload(filepath, filename, ftpUrl, ftpPath, ftpUser,
+						ftpPassword);
+
+				// 更新日结标记
+				Map<String, Object> mapData = new HashMap<String, Object>();
+				mapData.put(PosTable.COLUMN_END_DAY, 1);
+				parent.data.posTable.update(mapData, new String[] { "0" },
+						new String[] { PosTable.COLUMN_END_DAY });
+				// 备份数据
+				bakup(filepath, filename);
+				// 营业日期加1
+				addSaleDate();
+			}
+
+		} catch (IllegalArgumentException e) {
+		} catch (SecurityException e) {
+		} catch (IllegalAccessException e) {
+		} catch (NoSuchFieldException e) {
+		} catch (FileNotFoundException e) {
+		} catch (UnsupportedEncodingException e) {
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+				}
+				input = null;
+			}
+			if (output != null) {
+				output.close();
+				output = null;
+			}
+
+		}
+	}
+
+	//备份数据，并删除多余备份
+	private void bakup(String filepath, String filename) throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException {
+		Object[] deviceMasterObjs = DatabaseHelper.getSingleColumn(
+				parent.getContentResolver(),
+				new Object[] { "9", Util.getLocalDeviceId(parent) },
+				DeviceMaster.class);
+		String bakpath = (String) DatabaseHelper.getColumnValue(
+				deviceMasterObjs, DeviceMaster.COLUMN_FIELD_02,
+				DeviceMaster.COLUMNS);
+		String bakday = (String) DatabaseHelper.getColumnValue(
+				deviceMasterObjs, DeviceMaster.COLUMN_FIELD_03,
+				DeviceMaster.COLUMNS);
+		//无备份路径不备份文件，备份路径无法建立也不备份文件
+		if(bakpath==null||bakpath.trim().length()==0)
+			return;
+		bakpath = bakpath.trim();
+		File bakDir = new File(bakpath);
+		try {
+			if(!bakDir.exists())
+				bakDir.mkdirs();
+		} catch (Exception e) {
+			return;
+		}
+		int copyFile = Util.CopyFile(filepath + File.separatorChar + filename,bakpath+ File.separatorChar + filename);
+		//备份文件保留，默认30天
+		if(bakday==null||bakday.trim().length()==0)
+			bakday = "30";
+		Integer bd = null;
+		try {
+			bd = new Integer(bakday);
+		} catch (Exception e) {
+			bd = new Integer(30);
+		}
+		File[] bakFiles = bakDir.listFiles();
+		if(bakFiles!=null&&bakFiles.length>bd)
+		{
+			List<File> fl = new ArrayList();
+			for(File f:bakFiles)
+				fl.add(f);
+			//排序
+			Collections.sort(fl, new Comparator<File>() {
+
+				public int compare(File o1, File o2) {
+					return o1.getName().compareToIgnoreCase(o2.getName())*-1;
+				}
+			});
+			//按日期和数量比较，大于bd的删除
+			Map<String,String> fm = new HashMap();
+			for(File f:fl)
+			{
+				String sn = f.getName().substring(f.getName().lastIndexOf(".")+1);
+				String d = sn.substring(0,8);
+				if(fm.get(d)!=null)
+					continue;
+				else
+				{
+					if(fm.size()>bd)
+						f.delete();
+					else
+						fm.put(d, d);
+				}
+			}
+		}
+	}
+
+	//营业日期增加
+	private void addSaleDate() throws IllegalAccessException,
+			NoSuchFieldException, ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Object[] deviceMasterObjs = DatabaseHelper.getSingleColumn(
+				parent.getContentResolver(),
+				new Object[] { "1", Util.getLocalDeviceId(parent) },
+				DeviceMaster.class);
+		String strDocumentDate = (String) DatabaseHelper.getColumnValue(
+				deviceMasterObjs, DeviceMaster.COLUMN_FIELD_04,
+				DeviceMaster.COLUMNS);
+		Date date = null;
+		if (strDocumentDate == null)
+			date = new Date();
+		else
+			date = sdf.parse(strDocumentDate);
+		date = new Date(date.getTime() + 24 * 60 * 60 * 1000);
+		Map<String, Object> sd = new HashMap();
+		sd.put(DeviceMaster.COLUMN_FIELD_04, sdf.format(date));
+		parent.data.deviceMaster
+		.update(sd,
+				new String[] {
+						"1",
+						Util.getLocalDeviceId(parent) },
+				new String[] {
+						DeviceMaster.COLUMN_INIT_ID,
+						DeviceMaster.COLUMN_DEVICE_ID });
 	}
 
 	private void initButtonViewConfig() {
@@ -235,53 +372,104 @@ public class Init {
 					public void onClick(View v) {
 
 						popupConfigWindow();
+					}
 
-						// Intent intent = new Intent();
-						// intent.setClassName("com.netsdl.android.main.view",
-						// "com.netsdl.android.main.view.MainActivity");
-						// parent.startActivity(intent);
+				});
+	}
 
-						// Intent i = new
-						// Intent("com.netsdl.android.intent.ACTION_VIEW");
-						// i.addCategory(Intent.CATEGORY_DEFAULT);
-						// parent.startActivity(i);
+	private void initButtonSaleDate() {
+		((Button) parent.findViewById(R.id.buttonSaleDate))
+				.setOnClickListener(new View.OnClickListener() {
+					public void onClick(View v) {
+						final SimpleDateFormat sdf = new SimpleDateFormat(
+								"yyyy-MM-dd");
+						try {
+							// 查询营业日期
+							Object[] deviceMasterObjs = DatabaseHelper.getSingleColumn(
+									parent.getContentResolver(),
+									new Object[] { "1",
+											Util.getLocalDeviceId(parent) },
+									DeviceMaster.class);
+							String strDocumentDate = (String) DatabaseHelper
+									.getColumnValue(deviceMasterObjs,
+											DeviceMaster.COLUMN_FIELD_04,
+											DeviceMaster.COLUMNS);
+							Date date = null;
+							if (strDocumentDate == null||strDocumentDate.trim().length()==0)
+								date = new Date();
+							else
+								date = sdf.parse(strDocumentDate);
+							Calendar calendar = Calendar.getInstance();
+							calendar.setTime(date);
 
-						// Intent intent = new Intent();
-						// intent.setClassName( "com.netsdl.android.main.view" ,
-						// "com.netsdl.android.main.view.MainActivity" );
-						// parent.startActivity(intent);
+							DatePickerDialog dd = new DatePickerDialog(parent,
+									new OnDateSetListener() {
 
-						// SoapObject rpc = new SoapObject(
-						// "http://print.web.netsdl.com/", "test");
-						// rpc.addProperty("str", "aaab");
-						// SoapSerializationEnvelope envelope = new
-						// SoapSerializationEnvelope(
-						// SoapEnvelope.VER10);
-						//
-						// envelope.bodyOut = rpc;
-						// envelope.dotNet = true;
-						// envelope.setOutputSoapObject(rpc);
-						//
-						// HttpTransportSE ht = new HttpTransportSE(
-						// "http://10.0.2.2:8080/NetSDL_WebPrint/wsdl/Util.wsdl");
-						// ht.debug = true;
-						// try {
-						//
-						// ht.call("http://print.web.netsdl.com/test",
-						// envelope);
-						//
-						// SoapObject result = (SoapObject) envelope
-						// .getResponse();
-						//
-						// System.out.println("result " + result);
-						//
-						// Toast.makeText(parent, result.toString(),
-						// Toast.LENGTH_LONG).show();
-						//
-						// } catch (Exception e) {
-						// e.printStackTrace();
-						// }
-						//
+										public void onDateSet(DatePicker view,
+												int year, int monthOfYear,
+												int dayOfMonth) {
+											Calendar calendar = Calendar
+													.getInstance();
+											calendar.set(Calendar.YEAR, year);
+											calendar.set(Calendar.MONTH,
+													monthOfYear);
+											calendar.set(Calendar.DAY_OF_MONTH,
+													dayOfMonth);
+											String strDocumentDate = sdf
+													.format(calendar.getTime());
+
+											// 保存营业日期
+											try {
+												Map<String, Object> sd = new HashMap();
+												sd.put(DeviceMaster.COLUMN_FIELD_04,
+														strDocumentDate);
+												parent.data.deviceMaster
+														.update(sd,
+																new String[] {
+																		"1",
+																		Util.getLocalDeviceId(parent) },
+																new String[] {
+																		DeviceMaster.COLUMN_INIT_ID,
+																		DeviceMaster.COLUMN_DEVICE_ID });
+											} catch (IllegalArgumentException e) {
+												// TODO Auto-generated catch
+												// block
+												e.printStackTrace();
+											} catch (SecurityException e) {
+												// TODO Auto-generated catch
+												// block
+												e.printStackTrace();
+											} catch (IllegalAccessException e) {
+												// TODO Auto-generated catch
+												// block
+												e.printStackTrace();
+											} catch (NoSuchFieldException e) {
+												// TODO Auto-generated catch
+												// block
+												e.printStackTrace();
+											}
+										}
+									}, calendar.get(Calendar.YEAR), calendar
+											.get(Calendar.MONTH), calendar
+											.get(Calendar.DAY_OF_MONTH));
+							dd.setTitle(R.string.saleDate);
+							dd.show();
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IllegalArgumentException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (SecurityException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IllegalAccessException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (NoSuchFieldException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 
 				});
@@ -299,7 +487,7 @@ public class Init {
 
 							String strLocalDeviceId = Util
 									.getLocalDeviceId(parent);
-							//Log.d("LocalDeviceId", strLocalDeviceId);
+							// Log.d("LocalDeviceId", strLocalDeviceId);
 
 							initInfo = Util.getInitInfo();
 
