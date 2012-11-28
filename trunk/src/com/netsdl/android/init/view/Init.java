@@ -20,9 +20,6 @@ import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
 
-import android.annotation.SuppressLint;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.DatePickerDialog;
@@ -31,6 +28,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnDismissListener;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -50,6 +48,7 @@ import com.netsdl.android.common.db.PosTable;
 import com.netsdl.android.common.db.SkuMaster;
 import com.netsdl.android.common.db.StoreMaster;
 import com.netsdl.android.common.dialog.progress.AbstractProgressThread;
+import com.netsdl.android.init.ConfigProperties;
 import com.netsdl.android.init.R;
 import com.netsdl.android.init.dialog.progress.commodity.CommodityProgressDialog;
 import com.netsdl.android.init.dialog.progress.commodity.CommodityProgressHandler;
@@ -204,9 +203,12 @@ public class Init {
 				return;
 			}
 			for (int i = 0; i < objss.length; i++) {
-				for (int j = 0; j < objss[i].length - 1; j++) {
+				for (int j = 0; j < objss[i].length; j++) {
+					//日结标记不导出
+					if(j==DatabaseHelper.getColumnIndex(PosTable.COLUMN_END_DAY, PosTable.COLUMNS))
+						continue;
 					output.print(objss[i][j]);
-					if (j != objss[i].length - 2) {
+					if (j != objss[i].length - 1) {
 						output.print(',');
 					}
 				}
