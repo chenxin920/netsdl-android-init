@@ -61,5 +61,9 @@
     <string name="DeviceData">设备数据</string>
     <string name="ViewConfig">查看配置</string>
     <string name="saleDate">营业日期设置</string>
+    <string name="configUrlNoFind">POS服务地址没有配置</string>
+    <string name="updateError">无更新消息</string>
+    <string name="endDayMessage1">日结成功，无上传数据</string>
+    <string name="endDayMessage2">日结成功</string>
 
 </resources>

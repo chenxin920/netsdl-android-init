@@ -1,5 +1,6 @@
 package com.netsdl.android.init.view;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,7 +29,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnDismissListener;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -37,6 +37,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.netsdl.android.common.Constant;
 import com.netsdl.android.common.Util;
@@ -200,6 +201,8 @@ public class Init {
 			if (objss == null || objss.length == 0) {
 				// 没数据营业日期也增加
 				addSaleDate();
+				Toast.makeText(parent, R.string.endDayMessage1, Toast.LENGTH_SHORT)
+				.show();
 				return;
 			}
 			for (int i = 0; i < objss.length; i++) {
@@ -247,6 +250,12 @@ public class Init {
 				bakup(filepath, filename);
 				// 营业日期加1
 				addSaleDate();
+				//删除生成的文件
+				new File(filepath + File.separatorChar + filename).delete();
+				//删除销售数据
+				//parent.data.posTable.deleteByKey(new String[] { PosTable.COLUMN_END_DAY },new String[] { "1" });
+				Toast.makeText(parent, R.string.endDayMessage2, Toast.LENGTH_SHORT)
+				.show();
 			}
 
 		} catch (IllegalArgumentException e) {
@@ -477,71 +486,330 @@ public class Init {
 				});
 	}
 
+	//更新检查
 	private void initButtonCheckDB() {
 
 		((Button) parent.findViewById(R.id.buttonCheckDB))
 				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
-						try {
-							// String strLocalMacAddress =
-							// Util.getLocalMacAddress(parent);
-							// Log.d("LocalMacAddress",strLocalMacAddress);
-
-							String strLocalDeviceId = Util
-									.getLocalDeviceId(parent);
-							// Log.d("LocalDeviceId", strLocalDeviceId);
-
-							initInfo = Util.getInitInfo();
-
-							infoSku = Util.getInfo(initInfo.get(Init.KEY_SKU));
-
-							infoStore = Util.getInfo(initInfo.get(Init.STORE));
-
-							infoPayment = Util.getInfo(initInfo
-									.get(Init.PAYMENT));
-
-							infoDevice = Util.getInfo(initInfo.get(Init.DEVICE));
-
-							((TextView) parent
-									.findViewById(R.id.CommodityDataHostVersion))
-									.setText(infoSku.get(Constant.VERSION));
-							((Button) parent
-									.findViewById(R.id.buttonUpdateCommodity))
-									.setEnabled(true);
-
-							((TextView) parent
-									.findViewById(R.id.StoreDataHostVersion))
-									.setText(infoStore.get(Constant.VERSION));
-							((Button) parent
-									.findViewById(R.id.buttonUpdateStore))
-									.setEnabled(true);
-
-							((TextView) parent
-									.findViewById(R.id.PaymentDataHostVersion))
-									.setText(infoPayment.get(Constant.VERSION));
-							((Button) parent
-									.findViewById(R.id.buttonUpdatePayment))
-									.setEnabled(true);
-
-							((TextView) parent
-									.findViewById(R.id.DeviceDataHostVersion))
-									.setText(infoDevice.get(Constant.VERSION));
-							((Button) parent
-									.findViewById(R.id.buttonUpdateDevice))
-									.setEnabled(true);
-
-						} catch (ClientProtocolException e) {
-							e.printStackTrace();
-						} catch (URISyntaxException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-
+						checkUpdate2();
 					}
 				});
 	}
 
+	private void checkUpdate2() {
+		try {
+			 clearUpdateInfo();
+			// String strLocalMacAddress =
+			// Util.getLocalMacAddress(parent);
+			// Log.d("LocalMacAddress",strLocalMacAddress);
+
+			String strLocalDeviceId = Util
+					.getLocalDeviceId(parent);
+			// Log.d("LocalDeviceId", strLocalDeviceId);
+
+			initInfo = Util.getInitInfo();
+
+			infoSku = Util.getInfo(initInfo.get(Init.KEY_SKU));
+
+			infoStore = Util.getInfo(initInfo.get(Init.STORE));
+
+			infoPayment = Util.getInfo(initInfo
+					.get(Init.PAYMENT));
+
+			infoDevice = Util.getInfo(initInfo.get(Init.DEVICE));
+
+			((TextView) parent
+					.findViewById(R.id.CommodityDataHostVersion))
+					.setText(infoSku.get(Constant.VERSION));
+			((Button) parent
+					.findViewById(R.id.buttonUpdateCommodity))
+					.setEnabled(true);
+
+			((TextView) parent
+					.findViewById(R.id.StoreDataHostVersion))
+					.setText(infoStore.get(Constant.VERSION));
+			((Button) parent
+					.findViewById(R.id.buttonUpdateStore))
+					.setEnabled(true);
+
+			((TextView) parent
+					.findViewById(R.id.PaymentDataHostVersion))
+					.setText(infoPayment.get(Constant.VERSION));
+			((Button) parent
+					.findViewById(R.id.buttonUpdatePayment))
+					.setEnabled(true);
+
+			((TextView) parent
+					.findViewById(R.id.DeviceDataHostVersion))
+					.setText(infoDevice.get(Constant.VERSION));
+			((Button) parent
+					.findViewById(R.id.buttonUpdateDevice))
+					.setEnabled(true);
+
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	//清空版本信息
+	private void clearUpdateInfo()
+	{
+		initInfo.clear();
+		infoSku.clear();
+		infoStore.clear();
+		infoPayment.clear();
+		infoDevice.clear();
+		((TextView) parent
+				.findViewById(R.id.CommodityDataLocalVersion))
+				.setText("");
+		((TextView) parent
+				.findViewById(R.id.CommodityDataHostVersion))
+				.setText("");
+		((Button) parent
+				.findViewById(R.id.buttonUpdateCommodity))
+				.setEnabled(false);
+
+		((TextView) parent
+				.findViewById(R.id.StoreDataLocalVersion))
+				.setText("");
+		((TextView) parent
+				.findViewById(R.id.StoreDataHostVersion))
+				.setText("");
+		((Button) parent
+				.findViewById(R.id.buttonUpdateStore))
+				.setEnabled(false);
+
+		((TextView) parent
+				.findViewById(R.id.PaymentDataLocalVersion))
+				.setText("");
+		((TextView) parent
+				.findViewById(R.id.PaymentDataHostVersion))
+				.setText("");
+		((Button) parent
+				.findViewById(R.id.buttonUpdatePayment))
+				.setEnabled(false);
+
+		((TextView) parent
+				.findViewById(R.id.DeviceDataLocalVersion))
+				.setText("");
+		((TextView) parent
+				.findViewById(R.id.DeviceDataHostVersion))
+				.setText("");
+		((Button) parent
+				.findViewById(R.id.buttonUpdateDevice))
+				.setEnabled(false);
+	}
+	
+	private void checkUpdate() {
+		 clearUpdateInfo();
+		//通过Config配置得到店铺数据的更新位置URL
+		String url = ConfigProperties.getProperties("pos.config.url");
+		if(url==null||url.trim().length()==0)
+		{
+			Toast.makeText(parent, R.string.configUrlNoFind, Toast.LENGTH_SHORT)
+			.show();
+			return;
+		}
+		//URL下固定路径，得到device_update.txt、payment_update.txt、sku_update.txt、store_update.txt配置信息
+		String configUrl = getUpdateConfigUrl(url);
+		//配置文件中包含更新地址、版本和记录数
+		try {
+			chekcSkuUpdate(configUrl+"sku_update.txt");
+			infoStore = Util.getInfo(configUrl+"store_update.txt");
+			infoPayment = Util.getInfo(configUrl+"payment_update.txt");
+			infoDevice = Util.getInfo(configUrl+"device_update.txt");
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RuntimeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(infoSku.get(Constant.VERSION)==null)
+		{
+			((TextView) parent
+					.findViewById(R.id.CommodityDataHostVersion))
+					.setText(R.string.updateError);
+			((Button) parent
+					.findViewById(R.id.buttonUpdateCommodity))
+					.setEnabled(false);
+		}
+		else
+		{
+			((TextView) parent
+					.findViewById(R.id.CommodityDataHostVersion))
+					.setText(infoSku.get(Constant.VERSION));
+			((Button) parent
+					.findViewById(R.id.buttonUpdateCommodity))
+					.setEnabled(true);
+		}
+		
+		if(infoStore.get(Constant.VERSION)==null)
+		{
+			((TextView) parent
+					.findViewById(R.id.StoreDataHostVersion))
+					.setText(R.string.updateError);
+			((Button) parent
+					.findViewById(R.id.buttonUpdateStore))
+					.setEnabled(false);
+		}
+		else
+		{
+			((TextView) parent
+					.findViewById(R.id.StoreDataHostVersion))
+					.setText(infoStore.get(Constant.VERSION));
+			((Button) parent
+					.findViewById(R.id.buttonUpdateStore))
+					.setEnabled(true);
+		}
+		
+		if(infoPayment.get(Constant.VERSION)==null)
+		{
+			((TextView) parent
+					.findViewById(R.id.PaymentDataHostVersion))
+					.setText(R.string.updateError);
+			((Button) parent
+					.findViewById(R.id.buttonUpdatePayment))
+					.setEnabled(false);
+		}
+		else
+		{
+			((TextView) parent
+					.findViewById(R.id.PaymentDataHostVersion))
+					.setText(infoPayment.get(Constant.VERSION));
+			((Button) parent
+					.findViewById(R.id.buttonUpdatePayment))
+					.setEnabled(true);
+		}
+		
+		if(infoDevice.get(Constant.VERSION)==null)
+		{
+			((TextView) parent
+					.findViewById(R.id.DeviceDataHostVersion))
+					.setText(R.string.updateError);
+			((Button) parent
+					.findViewById(R.id.buttonUpdateDevice))
+					.setEnabled(false);
+		}
+		else
+		{
+			((TextView) parent
+					.findViewById(R.id.DeviceDataHostVersion))
+					.setText(infoDevice.get(Constant.VERSION));
+			((Button) parent
+					.findViewById(R.id.buttonUpdateDevice))
+					.setEnabled(true);
+		}
+		
+	}
+	
+	//得到配置文件地址
+	private String getUpdateConfigUrl(String url)
+	{
+		return "";
+	}
+	
+	//商品更新检查
+	private void chekcSkuUpdate(String skuUrl)
+	{
+		Map<String,String> skuMap = getSkuConfig(skuUrl);
+		if(skuMap==null||skuMap.get("allSkuUrl")==null||skuMap.get("allSkuVersion")==null||skuMap.get("allSkuRows")==null)
+		{
+			return;
+		}
+		//如果服务器上没增量更新版本，则使用全量更新
+		if(skuMap.get("addSkuUrl")==null||skuMap.get("addSkuVersion")==null||skuMap.get("addSkuRows")==null)
+		{
+			infoSku.put(Constant.URL,skuMap.get("allSkuUrl"));
+			infoSku.put(Constant.VERSION,skuMap.get("allSkuVersion"));	
+			infoSku.put(Constant.ROWS,skuMap.get("allSkuRows"));
+			return;
+		}
+			
+		String currentVersion =((TextView) parent.findViewById(R.id.CommodityDataLocalVersion)).getText().toString().trim();
+		//如果本地版本同上次更新版本相同，则只更新增量版本
+		if(currentVersion.equalsIgnoreCase(skuMap.get("allSkuVersion")))
+		{
+			infoSku.put(Constant.URL,skuMap.get("addSkuUrl"));
+			infoSku.put(Constant.VERSION,skuMap.get("addSkuVersion"));				
+			infoSku.put(Constant.ROWS,skuMap.get("addSkuRows"));
+		}
+		else
+		{
+			infoSku.put(Constant.URL,skuMap.get("allSkuUrl"));
+			infoSku.put(Constant.VERSION,skuMap.get("addSkuVersion"));				
+			infoSku.put(Constant.ROWS,skuMap.get("allSkuRows"));
+		}
+	}
+	
+	//通过配置文件得到SKU更新的配置
+	private Map getSkuConfig(String skuUrl)
+	{
+		BufferedReader in = null;
+		try {
+			in = null;
+			in = Util.getBufferedReaderFromURI(skuUrl);
+			Map<String, String> map = new HashMap<String, String>();
+			String line = in.readLine();
+			if(line==null)
+				return map;
+			map.put("allSkuUrl", line);
+			line = in.readLine();
+			if(line==null)
+				return map;
+			map.put("allSkuVersion", line);
+			line = in.readLine();
+			if(line==null)
+				return map;
+			map.put("allSkuRows", line);
+			line = in.readLine();
+			if(line==null)
+				return map;
+			map.put("addSkuUrl", line);
+			line = in.readLine();
+			if(line==null)
+				return map;
+			map.put("addSkuVersion", line);
+			line = in.readLine();
+			if(line==null)
+				return map;
+			map.put("addSkuRows", line);
+			return map;
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}  catch (RuntimeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (in != null) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
+	}
+	
 	private void initButtonUpdateCommodity() {
 		((Button) parent.findViewById(R.id.buttonUpdateCommodity))
 				.setOnClickListener(new View.OnClickListener() {
@@ -576,7 +844,7 @@ public class Init {
 											if (commodityProgressThread.mState == AbstractProgressThread.STATE_DONE) {
 
 												parent.data.dbMaster
-														.deleteByKey(new String[] { infoSku
+														.deleteByKey(null,new String[] { infoSku
 																.get(Constant.VERSION) });
 
 												parent.data.dbMaster.insert(new String[] {
@@ -652,7 +920,7 @@ public class Init {
 										try {
 											if (storeProgressThread.mState == AbstractProgressThread.STATE_DONE) {
 												parent.data.dbMaster
-														.deleteByKey(new String[] { infoStore
+														.deleteByKey(null,new String[] { infoStore
 																.get(Constant.VERSION) });
 												parent.data.dbMaster.insert(new String[] {
 														StoreMaster.TABLE_NAME,
@@ -727,7 +995,7 @@ public class Init {
 										try {
 											if (paymentProgressThread.mState == AbstractProgressThread.STATE_DONE) {
 												parent.data.dbMaster
-														.deleteByKey(new String[] { infoPayment
+														.deleteByKey(null,new String[] { infoPayment
 																.get(Constant.VERSION) });
 
 												parent.data.dbMaster.insert(new String[] {
@@ -803,7 +1071,7 @@ public class Init {
 										try {
 											if (deviceProgressThread.mState == AbstractProgressThread.STATE_DONE) {
 												parent.data.dbMaster
-														.deleteByKey(new String[] { infoDevice
+														.deleteByKey(null,new String[] { infoDevice
 																.get(Constant.VERSION) });
 
 												parent.data.dbMaster.insert(new String[] {
